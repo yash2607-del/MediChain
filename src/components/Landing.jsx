@@ -2,6 +2,24 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../styles/landing.scss'
 
+// React Icons imports
+import { 
+  FaUserMd,           // Doctor
+  FaUser,             // Patient  
+  FaClinicMedical,    // Pharmacy
+  FaLink,             // Blockchain
+  FaBoxes,            // Inventory
+  FaMapMarkerAlt,     // Map
+  FaRobot,            // AI
+  FaTh,               // Dashboard
+  FaCheckCircle,      // Verified
+  FaMobileAlt,        // Mobile
+  FaShieldAlt,           // Insurance
+  FaExclamationTriangle, // Conflict
+  FaMicrophone,       // Voice
+  FaVideo             // Telemedicine
+} from 'react-icons/fa'
+
 export default function Landing() {
   const navigate = useNavigate()
   const [showModal, setShowModal] = useState(false)
@@ -12,8 +30,7 @@ export default function Landing() {
   
   const handleRoleSelect = (role) => {
     setSelectedRole(role)
-    const routes = { doctor: '/doctors', patient: '/patients', pharmacy: '/pharmacies' }
-    navigate(routes[role])
+    navigate(`/auth/${role}`)
     setShowModal(false)
   }
 
@@ -70,7 +87,9 @@ export default function Landing() {
           <h2>Built for Every Healthcare Stakeholder</h2>
           <div className="roles-grid">
             <div className="role-card" onClick={() => navigate('/doctors')}>
-              <div className="role-icon">🧑‍⚕️</div>
+              <div className="role-icon">
+                <FaUserMd size={48} color="#00A9FF" />
+              </div>
               <h3>Doctors</h3>
               <ul>
                 <li>Create digital prescriptions and store them immutably on the blockchain</li>
@@ -81,7 +100,9 @@ export default function Landing() {
             </div>
 
             <div className="role-card" onClick={() => navigate('/patients')}>
-              <div className="role-icon">🧍‍♂️</div>
+              <div className="role-icon">
+                <FaUser size={48} color="#00A9FF" />
+              </div>
               <h3>Patients</h3>
               <ul>
                 <li>View all verified prescriptions securely on their dashboard</li>
@@ -92,7 +113,9 @@ export default function Landing() {
             </div>
 
             <div className="role-card" onClick={() => navigate('/pharmacies')}>
-              <div className="role-icon">💊</div>
+              <div className="role-icon">
+                <FaClinicMedical size={48} color="#00A9FF" />
+              </div>
               <h3>Pharmacies</h3>
               <ul>
                 <li>Scan QR codes to verify prescriptions via blockchain before dispensing</li>
@@ -111,37 +134,49 @@ export default function Landing() {
           <h2>Core Features</h2>
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">⛓️</div>
+              <div className="feature-icon">
+                <FaLink size={48} color="#00A9FF" />
+              </div>
               <h3>Blockchain-Powered Prescriptions</h3>
               <p>Every prescription is hashed and stored on-chain for authenticity verification.</p>
             </div>
             
             <div className="feature-card">
-              <div className="feature-icon">📊</div>
+              <div className="feature-icon">
+                <FaBoxes size={48} color="#00A9FF" />
+              </div>
               <h3>Pharmacy Inventory Management</h3>
               <p>Add, track, and scan medicine stock using QR codes.</p>
             </div>
             
             <div className="feature-card">
-              <div className="feature-icon">🗺️</div>
+              <div className="feature-icon">
+                <FaMapMarkerAlt size={48} color="#00A9FF" />
+              </div>
               <h3>Medicine Locator Map</h3>
               <p>Patients can search for medicines nearby via geolocation-enabled maps.</p>
             </div>
             
             <div className="feature-card">
-              <div className="feature-icon">🤖</div>
+              <div className="feature-icon">
+                <FaRobot size={48} color="#00A9FF" />
+              </div>
               <h3>AI Chatbot</h3>
               <p>A generative AI chatbot helps patients classify symptoms and suggests the right doctor specialization.</p>
             </div>
             
             <div className="feature-card">
-              <div className="feature-icon">👥</div>
+              <div className="feature-icon">
+                <FaTh size={48} color="#00A9FF" />
+              </div>
               <h3>Role-Based Dashboards</h3>
               <p>Secure authentication and different dashboards for each user type.</p>
             </div>
             
             <div className="feature-card">
-              <div className="feature-icon">✅</div>
+              <div className="feature-icon">
+                <FaCheckCircle size={48} color="#00A9FF" />
+              </div>
               <h3>Verified Transactions</h3>
               <p>Pharmacies verify prescriptions through blockchain before dispensing.</p>
             </div>
@@ -155,7 +190,7 @@ export default function Landing() {
           <h2>How It Works</h2>
           <div className="flows-container">
             <div className="flow-card">
-              <h3>🌐 Blockchain Prescription Flow</h3>
+              <h3><FaLink size={24} color="#00A9FF" /> Blockchain Prescription Flow</h3>
               <div className="flow-steps">
                 <div className="step">
                   <span className="step-number">1</span>
@@ -181,7 +216,7 @@ export default function Landing() {
             </div>
 
             <div className="flow-card">
-              <h3>💬 AI Chatbot Flow</h3>
+              <h3><FaRobot size={24} color="#00A9FF" /> AI Chatbot Flow</h3>
               <div className="flow-steps">
                 <div className="step">
                   <span className="step-number">1</span>
@@ -199,7 +234,7 @@ export default function Landing() {
             </div>
 
             <div className="flow-card">
-              <h3>🗺️ Medicine Search & Map Integration</h3>
+              <h3><FaMapMarkerAlt size={24} color="#00A9FF" /> Medicine Search & Map Integration</h3>
               <div className="flow-steps">
                 <div className="step">
                   <span className="step-bullet">•</span>
@@ -229,23 +264,33 @@ export default function Landing() {
           <h2>Future Enhancements</h2>
           <div className="future-grid">
             <div className="future-item">
-              <span className="future-icon">📱</span>
+              <span className="future-icon">
+                <FaMobileAlt size={32} color="#00A9FF" />
+              </span>
               <p>Mobile app (React Native / Flutter)</p>
             </div>
             <div className="future-item">
-              <span className="future-icon">🧾</span>
+              <span className="future-icon">
+                <FaShieldAlt size={32} color="#00A9FF" />
+              </span>
               <p>Integration with insurance providers for e-claim verification</p>
             </div>
             <div className="future-item">
-              <span className="future-icon">🤖</span>
+              <span className="future-icon">
+                <FaExclamationTriangle size={32} color="#00A9FF" />
+              </span>
               <p>AI-based prescription conflict detection</p>
             </div>
             <div className="future-item">
-              <span className="future-icon">🗣️</span>
+              <span className="future-icon">
+                <FaMicrophone size={32} color="#00A9FF" />
+              </span>
               <p>Voice-based chatbot for accessibility</p>
             </div>
             <div className="future-item">
-              <span className="future-icon">🏥</span>
+              <span className="future-icon">
+                <FaVideo size={32} color="#00A9FF" />
+              </span>
               <p>Integration with telemedicine APIs for online consultations</p>
             </div>
           </div>
@@ -294,21 +339,27 @@ export default function Landing() {
                   className="role-option"
                   onClick={() => handleRoleSelect('doctor')}
                 >
-                  <span className="role-emoji">🧑‍⚕️</span>
+                  <span className="role-emoji">
+                    <FaUserMd size={32} color="#00A9FF" />
+                  </span>
                   <span>I'm a Doctor</span>
                 </button>
                 <button 
                   className="role-option"
                   onClick={() => handleRoleSelect('patient')}
                 >
-                  <span className="role-emoji">🧍‍♂️</span>
+                  <span className="role-emoji">
+                    <FaUser size={32} color="#00A9FF" />
+                  </span>
                   <span>I'm a Patient</span>
                 </button>
                 <button 
                   className="role-option"
                   onClick={() => handleRoleSelect('pharmacy')}
                 >
-                  <span className="role-emoji">💊</span>
+                  <span className="role-emoji">
+                    <FaClinicMedical size={32} color="#00A9FF" />
+                  </span>
                   <span>I'm a Pharmacy</span>
                 </button>
               </div>
