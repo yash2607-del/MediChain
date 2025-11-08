@@ -7,6 +7,10 @@ import NotFound from './pages/NotFound.jsx'
 import Landing from './components/Landing.jsx'
 import DoctorDashboard from './components/DoctorDashboard.jsx'
 import RoleAuth from './components/RoleAuth.jsx'
+import ProfileRouter from './pages/profile/ProfileRouter.jsx'
+import DoctorProfile from './pages/profile/DoctorProfile.jsx'
+import PatientProfile from './pages/profile/PatientProfile.jsx'
+import PharmacyProfile from './pages/profile/PharmacyProfile.jsx'
 import FindADoctor from './pages/Patient/FindADoxtor.jsx'
 import AppointmentForm from './pages/Patient/Appointment-form.jsx'
 export default function App() {
@@ -22,13 +26,16 @@ export default function App() {
             <Route path="/patients" element={<Patients />} />
             <Route path="/pharmacies" element={<Pharmacies />} />
             <Route path="/auth/:role" element={<RoleAuth />} />
+            {/* Profile routing */}
+            <Route path="/profile" element={<ProfileRouter />} />
+            <Route path="/profile/doctor" element={<DoctorProfile />} />
+            <Route path="/profile/patient" element={<PatientProfile />} />
+            <Route path="/profile/pharmacy" element={<PharmacyProfile />} />
             <Route path="/appointment" element={<FindADoctor />} />
             <Route path="/appointment-form" element={<AppointmentForm />} />
 
 
 
-            {/* Legacy or shorthand route: redirect to /doctors */}
-            <Route path="/doctor" element={<Navigate to="/doctors" replace />} />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
@@ -36,5 +43,5 @@ export default function App() {
         </main>
       </div>
     </BrowserRouter>
-  )
+  );
 }
