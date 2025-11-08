@@ -26,7 +26,7 @@ export default function DoctorProfile() {
   }
 
   return (
-    <DashboardLayout brand="MedTrack" menuItems={menuItems} active={active} setActive={setActive}>
+    <DashboardLayout brand="MediChain" menuItems={menuItems} active={active} setActive={setActive}>
       <section style={{ padding: 18, maxWidth: 980 }}>
         {active === 'prescribe' && (
           <>

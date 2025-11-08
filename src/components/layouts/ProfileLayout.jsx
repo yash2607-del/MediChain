@@ -18,7 +18,7 @@ export default function ProfileLayout({
   return (
     <div className="profile-layout">
       <header className="profile-topbar">
-        <div className="brand">MedTrack</div>
+        <div className="brand">MediChain</div>
         <div className="top-actions">
           <h1 className="page-title">{title}</h1>
           <div className="userbox" onClick={() => setMenuOpen(o=>!o)}>

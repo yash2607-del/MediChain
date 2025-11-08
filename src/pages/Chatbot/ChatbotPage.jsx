@@ -12,7 +12,7 @@ export default function ChatbotPage() {
   return (
     <div className="chatbot-page">
       <DashboardLayout
-        brand="MedTrack"
+        brand="MediChain"
         menuItems={menuItems}
         active={active}
         setActive={setActive}

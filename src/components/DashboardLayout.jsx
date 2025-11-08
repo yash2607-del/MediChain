@@ -3,7 +3,7 @@ import '../styles/doctor-dashboard.scss'
 import { FaPills, FaCalendarAlt, FaClipboardList } from 'react-icons/fa'
 import { useNavigate, useLocation } from 'react-router-dom'
 
-export default function DashboardLayout({ brand = 'MedTrack', menuItems = [], active, setActive, children }) {
+export default function DashboardLayout({ brand = 'MediChain', menuItems = [], active, setActive, children }) {
   const [collapsed, setCollapsed] = useState(() => {
     try {
       return localStorage.getItem('dashboardCollapsed') === 'true'
