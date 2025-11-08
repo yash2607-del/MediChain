@@ -49,7 +49,7 @@ export default function DashboardLayout({ brand = 'MedTrack', menuItems = [], ac
                       aria-label={item.label}
                     >
                       <span className="short">
-                        {(() => {
+                        {item.icon ? item.icon : (() => {
                           switch (item.key) {
                             case 'prescribe': return <FaPills />
                             case 'calendar': return <FaCalendarAlt />
