@@ -23,6 +23,10 @@ body {
   margin: 0 auto;
 }
 
+.nav { margin-bottom: 1rem }
+.nav .brand { font-size: 1.05rem }
+.nav .nav-links a { color: var(--color-text-dark) }
+
 .btn-row { display:flex; justify-content:center; gap:0.5rem; margin-top:1rem }
 
 .btn {
