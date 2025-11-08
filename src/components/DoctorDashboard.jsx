@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import DashboardLayout from './DashboardLayout.jsx'
 import '../styles/doctor-dashboard.scss';
 import PrescribeForm from './doctor/PrescribeForm.jsx';
 import CalendarPane from './doctor/CalendarPane.jsx';
@@ -89,44 +90,46 @@ export default function DoctorDashboard() {
   ];
 
   return (
-    <DashboardLayout
-      brand="MedTrack"
-      sidebarItems={menuItems}
-      activeKey={active}
-      onChange={setActive}
-    >
-      {active === 'prescribe' && (
-        <section className="prescribe-pane">
-          <h2>Prescribe</h2>
-          <p>Create a prescription for a patient. All fields optional, but patient name recommended.</p>
-          <PrescribeForm />
-        </section>
-      )}
-      {active === 'calendar' && (
-        <CalendarPane
-          calendarDays={calendarDays}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          selectedAppointments={selectedAppointments}
-          heatColor={heatColor}
-        />
-      )}
-      {active === 'appointments' && (
-        <AppointmentsPane
-          appointmentRequests={appointmentRequests}
-          upcoming={upcoming}
-          inquiryOpenId={inquiryOpenId}
-          inquiryDrafts={inquiryDrafts}
-          formatDate={formatDate}
-          compareDateTime={compareDateTime}
-          rejectRequest={rejectRequest}
-          acceptRequest={acceptRequest}
-          toggleInquiry={toggleInquiry}
-          sendInquiry={sendInquiry}
-          onInquiryDraftChange={(id, value) => setInquiryDrafts(d => ({ ...d, [id]: value }))}
-        />
-      )}
-    </DashboardLayout>
+    <div className="doctor-dashboard">
+      <DashboardLayout
+        brand="MedTrack"
+        menuItems={menuItems}
+        active={active}
+        setActive={setActive}
+      >
+        {active === 'prescribe' && (
+          <section className="prescribe-pane">
+            <h2>Prescribe</h2>
+            <p>Create a prescription for a patient. All fields optional, but patient name recommended.</p>
+            <PrescribeForm />
+          </section>
+        )}
+        {active === 'calendar' && (
+          <CalendarPane
+            calendarDays={calendarDays}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            selectedAppointments={selectedAppointments}
+            heatColor={heatColor}
+          />
+        )}
+        {active === 'appointments' && (
+          <AppointmentsPane
+            appointmentRequests={appointmentRequests}
+            upcoming={upcoming}
+            inquiryOpenId={inquiryOpenId}
+            inquiryDrafts={inquiryDrafts}
+            formatDate={formatDate}
+            compareDateTime={compareDateTime}
+            rejectRequest={rejectRequest}
+            acceptRequest={acceptRequest}
+            toggleInquiry={toggleInquiry}
+            sendInquiry={sendInquiry}
+            onInquiryDraftChange={(id, value) => setInquiryDrafts(d => ({ ...d, [id]: value }))}
+          />
+        )}
+      </DashboardLayout>
+    </div>
   );
 }
 
