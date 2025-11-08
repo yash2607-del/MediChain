@@ -7,15 +7,16 @@ import PrescriptionTable from '../pages/Patient/Prescription-table.jsx'
 import PatientAppointments from '../pages/Patient/PatientAppointments.jsx'
 import ChatbotPopup from './chat/ChatbotPopup.jsx'
 import '../styles/chatbot-popup.scss'
+import { FaUserMd, FaCalendarPlus, FaCalendarCheck, FaPrescriptionBottle } from 'react-icons/fa'
 
 export default function PatientDashboard() {
   const [active, setActive] = useState('find-doctor')
 
   const menuItems = [
-    { key: 'find-doctor', label: 'Find Doctor' },
-    { key: 'book', label: 'Book Appointment' },
-    { key: 'appointments', label: 'My Appointments' },
-    { key: 'prescriptions', label: 'My Prescriptions' }
+    { key: 'find-doctor', label: 'Find Doctor', icon: <FaUserMd /> },
+    { key: 'book', label: 'Book Appointment', icon: <FaCalendarPlus /> },
+    { key: 'appointments', label: 'My Appointments', icon: <FaCalendarCheck /> },
+    { key: 'prescriptions', label: 'My Prescriptions', icon: <FaPrescriptionBottle /> }
   ]
 
   return (
