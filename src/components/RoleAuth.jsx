@@ -88,7 +88,11 @@ export default function RoleAuth() {
     const users = memoryDB[validRole]
     const found = users.find(u => u.email === loginData.email && u.password === loginData.password)
     if (found) {
-      setMessage(`Welcome back, ${found.name || found.shopName || 'user'}! (Pretend session started)`) 
+      // Persist simple session and redirect
+      const session = { role: validRole, user: found }
+      localStorage.setItem('session', JSON.stringify(session))
+      setMessage(`Welcome back, ${found.name || found.shopName || 'user'}! Redirecting...`) 
+      setTimeout(()=> navigate(`/profile/${validRole}`), 600)
     } else {
       setMessage('Invalid credentials or user not registered.')
     }
@@ -110,8 +114,10 @@ export default function RoleAuth() {
       return
     }
     saveUser(data)
-    setMessage(`${label} registered successfully! You can now log in.`)
-    setMode('login')
+    setMessage(`${label} registered successfully! Redirecting to profile...`)
+    const session = { role: validRole, user: data }
+    localStorage.setItem('session', JSON.stringify(session))
+    setTimeout(()=> navigate(`/profile/${validRole}`), 800)
   }
 
   const renderSignup = () => {
