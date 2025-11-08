@@ -114,7 +114,7 @@
   background: var(--color-bg-dark);
   color: var(--color-text-light);
   border: none;
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 0 0;
   box-shadow: none;
   height: calc(100vh - 64px);
   position: sticky;
@@ -125,36 +125,105 @@
   overflow: hidden;
 }
 
-.sidebar.joint ul { padding: 0 0.5rem }
+.sidebar.joint ul {
+  list-style: none;
+  margin: 8px 0;
+}
+.sidebar.joint ul li + li { margin-top: 8px; }
 .sidebar.joint button {
   color: var(--color-text-light);
   background: transparent;
   border: none;
-  padding: 0.65rem 0.75rem;
+  padding: 8px 12px;
   border-radius: 8px;
   text-align: left;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  height: 56px; /* consistent touch target */
+  width: 100%; /* use full row width so centering works precisely */
+  position: relative;
+  transition: background .18s ease, color .18s ease, box-shadow .18s ease;
 }
+
 .sidebar.joint button .short {
-  display: inline-block;
-  width: 28px;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  flex-shrink: 0;
   opacity: 0;
-  transform: translateX(-4px);
-  transition: opacity .22s ease, transform .28s ease;
+  transform: translateX(-6px) scale(1);
+  transition: background .2s ease, opacity .22s ease, transform .22s ease, box-shadow .22s ease;
+  will-change: transform;
 }
+
+.sidebar.joint button .short svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-text-light);
+  transition: color .18s ease, transform .18s ease, opacity .18s ease;
+}
+
 .sidebar.joint button .label {
   display: inline-block;
   white-space: nowrap;
   opacity: 1;
-  transition: opacity .18s ease, transform .22s ease, max-width .28s ease;
+  max-width: 200px;
+  transition: opacity .18s ease, transform .22s ease, max-width .28s ease, color .18s ease;
+  font-weight: 700;
+  position: relative;
 }
+
+/* animated underline for label on hover/active */
+.sidebar.joint button .label::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--color-3), rgba(255,255,255,0.2));
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  transition: transform .22s ease, opacity .22s ease;
+}
+
+.dashboard-shell.collapsed .sidebar.joint button { justify-content: center; gap: 0; padding: 8px; height: 56px; }
 .dashboard-shell.collapsed .sidebar.joint button .short { opacity: 1; transform: translateX(0); }
-.dashboard-shell.collapsed .sidebar.joint button .label { opacity: 0; transform: translateX(-6px); }
-.sidebar.joint button.active { background: rgba(255,255,255,0.06); color: var(--color-3); box-shadow:none }
+.dashboard-shell.collapsed .sidebar.joint button .label { opacity: 0; transform: translateX(-6px); max-width: 0; overflow: hidden; }
+.sidebar.joint button:hover { background: rgba(255,255,255,0.05); }
+.sidebar.joint button:hover .label { color: var(--color-3); transform: translateX(2px); }
+.sidebar.joint button:hover .label::after { transform: scaleX(1); opacity: 1; }
+.sidebar.joint button:hover .short { transform: translateX(0) scale(1.06); box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+.sidebar.joint button:hover .short svg { color: var(--color-3); transform: scale(1.05); }
+
+/* Active (selected) state with left accent bar, works in collapsed & expanded */
+.sidebar.joint button.active { background: rgba(255,255,255,0.10); color: var(--color-text-light); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); }
+.sidebar.joint button.active .label { color: var(--color-3); }
+.sidebar.joint button.active .label::after { transform: scaleX(1); opacity: 1; }
+.sidebar.joint button.active .short { transform: translateX(0) scale(1.02); }
+.sidebar.joint button.active .short svg { color: var(--color-3); }
+.sidebar.joint button.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  width: 3px;
+  height: 60%;
+  border-radius: 0 3px 3px 0;
+  background: var(--color-3);
+}
 .sidebar.joint.collapsed { padding-top: 0.6rem }
+/* keyboard focus ring */
+.sidebar.joint button:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,0.12), 0 0 0 4px rgba(0,0,0,0.2); }
+// .sidebar.joint button:focus-visible .short { box-shadow: 0 0 0 3px rgba(0, 123, 245, 0.36); }
+
+/* Hover/active states for icon container */
+/* moved into the hover/active blocks above for smoother combined effects */
 
 /* Ensure content area fills remaining space */
 .dashboard-shell .content { padding: 1rem 1.25rem }
@@ -200,7 +269,8 @@
   border: 1px solid var(--color-border);
   border-radius: 12px;
   box-shadow: 0 10px 24px var(--shadow-light);
-  padding: 1rem 1.25rem;
+  padding: 2rem 1.25rem;
+  margin: 1rem 1rem 1rem 1rem;
 
   h2 { margin-top: 0; color: #012; }
   p { color: rgba(1, 18, 34, 0.8); }

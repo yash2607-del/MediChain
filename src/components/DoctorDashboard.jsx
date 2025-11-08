@@ -4,7 +4,6 @@ import '../styles/doctor-dashboard.scss';
 import PrescribeForm from './doctor/PrescribeForm.jsx';
 import CalendarPane from './doctor/CalendarPane.jsx';
 import AppointmentsPane from './doctor/AppointmentsPane.jsx';
-import DashboardLayout from './layouts/DashboardLayout.jsx';
 import data from '../data/appointments.json';
 
 export default function DoctorDashboard() {

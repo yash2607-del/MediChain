@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import '../styles/doctor-dashboard.scss'
+import { FaPills, FaCalendarAlt, FaClipboardList } from 'react-icons/fa'
 
 export default function DashboardLayout({ brand = 'MedTrack', menuItems = [], active, setActive, children }) {
   const [collapsed, setCollapsed] = useState(false)
@@ -47,7 +48,16 @@ export default function DashboardLayout({ brand = 'MedTrack', menuItems = [], ac
                       title={item.label}
                       aria-label={item.label}
                     >
-                      <span className="short">{item.label.charAt(0)}</span>
+                      <span className="short">
+                        {(() => {
+                          switch (item.key) {
+                            case 'prescribe': return <FaPills />
+                            case 'calendar': return <FaCalendarAlt />
+                            case 'appointments': return <FaClipboardList />
+                            default: return item.label.charAt(0)
+                          }
+                        })()}
+                      </span>
                       <span className="label">{item.label}</span>
                     </button>
               </li>
