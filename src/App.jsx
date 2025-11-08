@@ -5,6 +5,7 @@ import Patients from './pages/Patients.jsx'
 import Pharmacies from './pages/Pharmacies.jsx'
 import NotFound from './pages/NotFound.jsx'
 import Landing from './components/Landing.jsx'
+import DoctorDashboard from './components/DoctorDashboard.jsx'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
           <Routes>
             {/* Home and public pages */}
             <Route path="/" element={<Landing />} />
+            <Route path="/doctor" element={<DoctorDashboard />} />
             <Route path="/doctors" element={<Doctors />} />
             <Route path="/patients" element={<Patients />} />
             <Route path="/pharmacies" element={<Pharmacies />} />
