@@ -101,7 +101,7 @@ export default function DoctorDashboard() {
   return (
     <div className="doctor-dashboard">
       <DashboardLayout
-        brand="MedTrack"
+        brand="MediChain"
         menuItems={menuItems}
         active={active}
         setActive={setActive}
