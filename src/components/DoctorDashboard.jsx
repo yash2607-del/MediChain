@@ -4,49 +4,18 @@ import '../styles/doctor-dashboard.scss';
 import PrescribeForm from './doctor/PrescribeForm.jsx';
 import CalendarPane from './doctor/CalendarPane.jsx';
 import AppointmentsPane from './doctor/AppointmentsPane.jsx';
+import DashboardLayout from './layouts/DashboardLayout.jsx';
+import data from '../data/appointments.json';
 
 export default function DoctorDashboard() {
-  const [profileOpen, setProfileOpen] = useState(false);
   const [active, setActive] = useState('prescribe');
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(() => today.toISOString().slice(0,10));
 
-  // Dummy appointment data keyed by ISO date (YYYY-MM-DD)
-  const appointmentsByDate = useMemo(() => ({
-    '2025-11-08': [
-      { time: '09:00', patient: 'Alice Patel', reason: 'Follow-up' },
-      { time: '09:30', patient: 'Rohit Sharma', reason: 'Flu symptoms' },
-      { time: '10:15', patient: 'Meena Gupta', reason: 'Blood pressure check' },
-      { time: '11:00', patient: 'Karan Verma', reason: 'Prescription renewal' }
-    ],
-    '2025-11-09': [
-      { time: '08:45', patient: 'Divya Rao', reason: 'Annual physical' }
-    ],
-    '2025-11-10': [
-      { time: '10:00', patient: 'John Doe', reason: 'Sprain follow-up' },
-      { time: '10:30', patient: 'Jane Smith', reason: 'General consultation' },
-      { time: '11:00', patient: 'Farhan Khan', reason: '' },
-      { time: '11:30', patient: 'Priya Singh', reason: 'Lab results' },
-      { time: '12:00', patient: 'Mohit Jain', reason: 'Diet advice' },
-      { time: '12:30', patient: 'Sara Lee', reason: 'Vaccination' },
-      { time: '13:00', patient: 'Carlos Perez', reason: 'Back pain' },
-      { time: '13:30', patient: 'Emily Chen', reason: 'Headache' },
-      { time: '14:00', patient: 'Ravi Desai', reason: 'Diabetes mgmt' },
-      { time: '14:30', patient: 'Nina Das', reason: 'Allergy test' },
-      { time: '15:00', patient: 'Omkar Kulkarni', reason: 'Routine check' }
-    ]
-  }), []);
-
-  // Appointment requests and upcoming appointments (dummy data)
-  const [appointmentRequests, setAppointmentRequests] = useState([
-    { id: crypto.randomUUID(), date: '2025-11-11', time: '10:30', patient: 'Arjun Mehta', reason: 'Back pain' },
-    { id: crypto.randomUUID(), date: '2025-11-11', time: '12:00', patient: 'Sanya Kapoor', reason: 'Fever' },
-    { id: crypto.randomUUID(), date: '2025-11-12', time: '09:15', patient: 'Ishaan Rao', reason: 'Follow-up' }
-  ]);
-  const [upcoming, setUpcoming] = useState([
-    { id: crypto.randomUUID(), date: '2025-11-10', time: '16:00', patient: 'Neha Iyer', reason: 'Allergy' },
-    { id: crypto.randomUUID(), date: '2025-11-11', time: '09:00', patient: 'Kabir Khan', reason: 'Annual physical' }
-  ]);
+  // Externalized dummy data
+  const appointmentsByDate = data.calendarAppointmentsByDate;
+  const [appointmentRequests, setAppointmentRequests] = useState(() => data.appointmentRequests);
+  const [upcoming, setUpcoming] = useState(() => data.upcoming);
 
   const [inquiryOpenId, setInquiryOpenId] = useState(null);
   const [inquiryDrafts, setInquiryDrafts] = useState({});
@@ -119,12 +88,6 @@ export default function DoctorDashboard() {
     { key: 'calendar', label: 'Calendar' },
     { key: 'appointments', label: 'Appointments' }
   ];
-
-  // Ensure page uses dashboard-specific body styling (no outer padding, bg color)
-  useEffect(() => {
-    document.body.classList.add('dashboard-mode');
-    return () => document.body.classList.remove('dashboard-mode');
-  }, []);
 
   return (
     <div className="doctor-dashboard">
