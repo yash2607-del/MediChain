@@ -1,0 +1,11 @@
+// Color palette (global)
+$color-1: #CDF5FD;
+$color-2: #89CFF3;
+$color-3: #00A9FF;
+
+// Also expose CSS variables for ease of use in JS-in-CSS or plain CSS
+:root {
+  --color-1: #CDF5FD;
+  --color-2: #89CFF3;
+  --color-3: #00A9FF;
+}

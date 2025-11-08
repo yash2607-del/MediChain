@@ -1,0 +1,38 @@
+@import 'colors';
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: linear-gradient(180deg, var(--color-1), #ffffff);
+  color: #012;
+  padding: 2rem;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.card {
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 8px 20px rgba(2,6,23,0.06);
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.btn-row { display:flex; justify-content:center; gap:0.5rem; margin-top:1rem }
+
+.btn {
+  background: var(--color-3);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn.secondary { background: var(--color-2); color: #012 }
