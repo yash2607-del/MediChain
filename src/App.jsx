@@ -7,12 +7,13 @@ import NotFound from './pages/NotFound.jsx'
 import Landing from './components/Landing.jsx'
 import DoctorDashboard from './components/DoctorDashboard.jsx'
 import PharmacyDashboard from './components/PharmacyDashboard.jsx'
+import PatientDashboard from './components/PatientDashboard.jsx'
 import RoleAuth from './components/RoleAuth.jsx'
 import ProfileRouter from './pages/profile/ProfileRouter.jsx'
 import DoctorProfile from './pages/profile/DoctorProfile.jsx'
 import PatientProfile from './pages/profile/PatientProfile.jsx'
 import PharmacyProfile from './pages/profile/PharmacyProfile.jsx'
-import FindADoctor from './pages/Patient/FindADoxtor.jsx'
+import FindADoctor from './pages/Patient/FindADoctor.jsx'
 import AppointmentForm from './pages/Patient/Appointment-form.jsx'
 import PrescriptionTable from './pages/Patient/Prescription-table.jsx'
 import PatientAppointments from './pages/Patient/PatientAppointments.jsx'
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/doctor" element={<DoctorDashboard />} />
             <Route path="/pharmacy" element={<PharmacyDashboard />} />
+            <Route path="/patient" element={<PatientDashboard />} />
             <Route path="/doctors" element={<Doctors />} />
             <Route path="/patients" element={<Patients />} />
             <Route path="/auth/:role" element={<RoleAuth />} />
@@ -38,12 +40,6 @@ export default function App() {
             <Route path="/appointment-form" element={<AppointmentForm />} />
             <Route path="/prescription-table" element={<PrescriptionTable />} />
             <Route path="/patient-appointments" element={<PatientAppointments />} />
-
-
-
-
-
-
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
