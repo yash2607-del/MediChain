@@ -1,10 +1,15 @@
 import React from 'react';
+import { FaPaperPlane, FaStop, FaTrash, FaRobot, FaUser } from 'react-icons/fa';
 import { streamText } from '../../lib/geminiClient';
 import { FORCED_MODEL } from '../../lib/geminiClient';
 
 export default function Chatbot() {
   const [messages, setMessages] = React.useState([
-    { role: 'system', text: 'You are a helpful health assistant. Provide general guidance only.' }
+    { 
+      role: 'assistant', 
+      text: 'Hello! I\'m your health assistant. I can help answer general health questions and provide information. How can I assist you today?',
+      timestamp: new Date()
+    }
   ]);
   const [input, setInput] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -17,11 +22,19 @@ export default function Chatbot() {
   React.useEffect(() => {
     // Auto-scroll to bottom whenever messages change
     const el = listRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [messages, loading]);
 
   function clearChat() {
-    setMessages([{ role: 'system', text: 'You are a helpful health assistant. Provide general guidance only.' }]);
+    setMessages([
+      { 
+        role: 'assistant', 
+        text: 'Chat cleared! How can I help you today?',
+        timestamp: new Date()
+      }
+    ]);
   }
 
   async function onSend(e) {
@@ -30,13 +43,14 @@ export default function Chatbot() {
     const text = input.trim();
     if (!text) return;
 
-    setMessages(m => [...m, { role: 'user', text }]);
+    setMessages(m => [...m, { role: 'user', text, timestamp: new Date() }]);
     setInput('');
     setLoading(true);
 
     // Build a simple prompt from history
     const prompt = messages
       .concat({ role: 'user', text })
+      .filter(m => m.role !== 'system')
       .map(m => `${m.role.toUpperCase()}: ${m.text}`)
       .join('\n') + '\nASSISTANT:';
 
@@ -45,7 +59,7 @@ export default function Chatbot() {
 
     // Placeholder assistant message at the end
     const assistantIndex = messages.length + 1;
-    setMessages(m => [...m, { role: 'assistant', text: '' }]);
+    setMessages(m => [...m, { role: 'assistant', text: '', timestamp: new Date() }]);
 
     try {
       await streamText(
