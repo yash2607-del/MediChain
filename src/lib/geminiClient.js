@@ -62,10 +62,21 @@ export async function generateText(prompt, modelName) {
 }
 
 // Streaming helper with automatic fallback
-export async function streamText(prompt, onChunk, modelName) {
+export async function streamText(prompt, onChunk, modelName, opts = {}) {
+  const { maxOutputTokens = 400, temperature = 0.7, shouldStop } = opts;
   const model = await getModel(modelName);
-  const stream = await model.generateContentStream(prompt);
+
+  // Use structured request so we can pass generationConfig
+  const stream = await model.generateContentStream({
+    contents: [{ role: 'user', parts: [{ text: prompt }]}],
+    generationConfig: {
+      maxOutputTokens,
+      temperature
+    }
+  });
+
   for await (const chunk of stream.stream) {
+    if (shouldStop?.()) break;
     const text = chunk.text();
     if (text) onChunk(text);
   }
