@@ -7,6 +7,7 @@ import NotFound from './pages/NotFound.jsx'
 import Landing from './components/Landing.jsx'
 import DoctorDashboard from './components/DoctorDashboard.jsx'
 import RoleAuth from './components/RoleAuth.jsx'
+import FindADoctor from './pages/Patient/FindADoxtor.jsx'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="/patients" element={<Patients />} />
             <Route path="/pharmacies" element={<Pharmacies />} />
             <Route path="/auth/:role" element={<RoleAuth />} />
+            <Route path="/appointment" element={<FindADoctor />} />
 
             {/* Legacy or shorthand route: redirect to /doctors */}
             <Route path="/doctor" element={<Navigate to="/doctors" replace />} />
