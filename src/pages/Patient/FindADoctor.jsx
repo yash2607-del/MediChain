@@ -34,7 +34,7 @@ export default function FindADoctor() {
   const [userCoords, setUserCoords] = useState(null)
   const [locError, setLocError] = useState('')
 
-  const getDoctorImage = (id) => `https://randomuser.me/api/portraits/${id % 2 === 0 ? 'men' : 'women'}/${((id - 1) % 50) + 1}.jpg`;
+  // Removed per-doctor photos; we now show a single generic silhouette icon for all cards.
 
   const doctorsData = useMemo(() => {
     const base = [
@@ -74,7 +74,6 @@ export default function FindADoctor() {
       title: row[1],
       speciality: row[2],
       specialization: row[3],
-      image: getDoctorImage(i+1),
       coords: coordsForId(i+1)
     }));
   }, [])
@@ -161,7 +160,12 @@ export default function FindADoctor() {
                 <motion.div key={d.name} whileHover={{ scale:1.02, y:-4 }} transition={{ type:'spring', stiffness:260, damping:22 }}>
                   <Card className="doctor-card">
                     <div className="doctor-card-hero">
-                      <img src={d.image} alt={d.name} onError={(e)=>{ e.target.src=`https://ui-avatars.com/api/?name=${encodeURIComponent(d.name)}&background=89CFF3&color=fff` }} />
+                      <div className="doctor-silhouette" aria-hidden="true">
+                        <svg width="96" height="96" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="12" cy="8" r="4.5" stroke="white" strokeWidth="1.5" fill="rgba(255,255,255,0.15)" />
+                          <path d="M4.5 19.5c0-3.59 3.134-6.5 7.5-6.5s7.5 2.91 7.5 6.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="rgba(255,255,255,0.07)" />
+                        </svg>
+                      </div>
                     </div>
                     <CardContent className="doctor-card-body">
                       <div className="card-row">
