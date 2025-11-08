@@ -7,7 +7,7 @@ import Patients from './pages/Patients.jsx'
 import Pharmacies from './pages/Pharmacies.jsx'
 import NotFound from './pages/NotFound.jsx'
 
-export default function App() {
+function HomeLayout() {
   return (
     <BrowserRouter>
       <div className="app">
@@ -27,6 +27,17 @@ export default function App() {
           </Routes>
         </main>
       </div>
+    </BrowserRouter>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/doctor" element={<DoctorDashboard />} />
+        <Route path="/" element={<HomeLayout />} />
+      </Routes>
     </BrowserRouter>
   )
 }
