@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 // Use local UI primitives (adjust path if different)
@@ -33,55 +33,57 @@ export default function FindADoctor() {
   const [maxDistanceKm, setMaxDistanceKm] = useState(25)
   const [userCoords, setUserCoords] = useState(null)
   const [locError, setLocError] = useState('')
+  const [doctors, setDoctors] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   // Removed per-doctor photos; we now show a single generic silhouette icon for all cards.
 
-  const doctorsData = useMemo(() => {
-    const base = [
-      ['Dr. Aakarsh Mahajan','Associate Consultant','Orthopaedics, Joint Replacement & Arthroscopy Surgeon','Orthopaedics and Joint Replacement'],
-      ['Dr. Aashish Chaudhry','Director & Head','Orthopaedics & Joint Replacement','Orthopaedics and Joint Replacement'],
-      ['Dr. Abhishek Kumar Sambharia','Consultant','Orthopaedics','Orthopaedics and Joint Replacement'],
-      ['Dr. Bharat Bahre','Senior Consultant & Associate Director','Orthopaedics & Joint Replacement','Orthopaedics and Joint Replacement'],
-      ['Dr. Vikram Singh','Consultant','Orthopaedics, Joint Replacement & Sports Medicine','Orthopaedics and Joint Replacement'],
-      ['Dr. Priya Verma','Director & Head','Cardiology & Interventional Cardiology','Cardiology'],
-      ['Dr. Sanjay Mehta','Senior Consultant','Cardiology & Cardiac Electrophysiology','Cardiology'],
-      ['Dr. Neha Gupta','Consultant','Cardiology & Preventive Cardiology','Cardiology'],
-      ['Dr. Rohit Agarwal','Associate Consultant','Cardiology & Heart Failure Management','Cardiology'],
-      ['Dr. Kavita Reddy','Senior Consultant','Cardiology & Cardiac Imaging','Cardiology'],
-      ['Dr. Amit Srivastava','Director','Neurosurgery & Neuro-oncology','Neurology & Neurosurgery'],
-      ['Dr. Madhukar Bhardwaj','Director & HOD','Neurology & Stroke Medicine','Neurology & Neurosurgery'],
-      ['Dr. Sunita Nair','Senior Consultant','Neurology & Epilepsy','Neurology & Neurosurgery'],
-      ['Dr. Karan Malhotra','Consultant','Neurosurgery & Spine Surgery','Neurology & Neurosurgery'],
-      ['Dr. Meera Joshi','Associate Consultant','Neurology & Movement Disorders','Neurology & Neurosurgery'],
-      ['Dr. Arun Kumar Giri','Director','Surgical Oncology & Gastrointestinal Surgery','Surgical Oncology'],
-      ['Dr. Shalini Kapoor','Senior Consultant','Surgical Oncology & Breast Surgery','Surgical Oncology'],
-      ['Dr. Deepak Chawla','Consultant','Surgical Oncology & Head & Neck Surgery','Surgical Oncology'],
-      ['Dr. Ritu Desai','Associate Consultant','Surgical Oncology & Gynecological Oncology','Surgical Oncology'],
-      ['Dr. Nitin Shah','Senior Consultant','Surgical Oncology & Uro-oncology','Surgical Oncology'],
-      ['Dr. Anjali Mehta','Director & Head','Dermatology & Cosmetic Dermatology','Dermatology'],
-      ['Dr. Rahul Kapoor','Senior Consultant','Dermatology & Skin Cancer Surgery','Dermatology'],
-      ['Dr. Sneha Patel','Consultant','Dermatology & Hair Transplant','Dermatology'],
-      ['Dr. Mohit Sharma','Associate Consultant','Dermatology & Pediatric Dermatology','Dermatology'],
-      ['Dr. Kavita Nair','Senior Consultant','Dermatology & Laser Therapy','Dermatology'],
-      ['Dr. Priya Sharma','Director & Head','Pediatrics & Neonatology','Pediatrics'],
-      ['Dr. Rajesh Verma','Senior Consultant','Pediatrics & Pediatric Cardiology','Pediatrics'],
-      ['Dr. Meera Desai','Consultant','Pediatrics & Pediatric Neurology','Pediatrics'],
-      ['Dr. Ankit Kumar','Associate Consultant','Pediatrics & Pediatric Emergency','Pediatrics'],
-      ['Dr. Sunita Reddy','Senior Consultant','Pediatrics & Developmental Pediatrics','Pediatrics']
-    ];
-    return base.map((row, i) => ({
-      name: row[0],
-      title: row[1],
-      speciality: row[2],
-      specialization: row[3],
-      coords: coordsForId(i+1)
-    }));
-  }, [])
+  // Fetch doctors from backend API
+  useEffect(() => {
+    let cancelled = false;
+    async function loadDoctors() {
+      setLoading(true); setError('');
+      try {
+        const base = import.meta.env.VITE_API_BASE_URL || '/';
+        // Basic fetch; could add ?q= for server-side search later
+        const url = new URL('api/auth/doctors', base).toString();
+        const res = await fetch(url);
+        const text = await res.text();
+        let data = {};
+        try { data = text ? JSON.parse(text) : {}; } catch { data = {}; }
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        const items = Array.isArray(data.items) ? data.items : [];
+        const mapped = items.map((doc, i) => {
+          const profile = doc.profile || {};
+          const rawName = profile.name || doc.email || 'Doctor';
+          const name = rawName.toLowerCase().startsWith('dr') ? rawName : `Dr. ${rawName}`;
+          const specialization = profile.specialization || profile.speciality || profile.field || 'General';
+          const title = profile.title || profile.designation || 'Consultant';
+          return {
+            name,
+            title,
+            speciality: profile.speciality || profile.specialization || specialization,
+            specialization,
+            coords: coordsForId(i + 1),
+            _id: doc._id || doc.id
+          };
+        });
+        if (!cancelled) setDoctors(mapped);
+      } catch (e) {
+        if (!cancelled) setError(e.message || 'Failed to load doctors');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    loadDoctors();
+    return () => { cancelled = true };
+  }, []);
 
   const specialities = useMemo(() => {
-    const s = Array.from(new Set(doctorsData.map(d => d.specialization)));
+    const s = Array.from(new Set(doctors.map(d => d.specialization)));
     return s.sort();
-  }, [doctorsData])
+  }, [doctors])
 
   function locateMe() {
     if (!navigator.geolocation) {
@@ -102,7 +104,7 @@ export default function FindADoctor() {
   }
 
   const filtered = useMemo(() => {
-    return doctorsData.filter(d => {
+    return doctors.filter(d => {
       if (speciality && d.specialization !== speciality) return false;
       if (nameSearch && !d.name.toLowerCase().includes(nameSearch.toLowerCase())) return false;
       if (userCoords && maxDistanceKm) {
@@ -111,7 +113,7 @@ export default function FindADoctor() {
       }
       return true;
     });
-  }, [doctorsData, speciality, nameSearch, userCoords, maxDistanceKm]);
+  }, [doctors, speciality, nameSearch, userCoords, maxDistanceKm]);
 
   return (
     <div className="find-doctor-wrapper">
@@ -149,11 +151,13 @@ export default function FindADoctor() {
         <main className="fd-main">
           <div className="fd-results-header">
             <h2>Doctors</h2>
-            <p className="muted">Showing {filtered.length} results</p>
+            <p className="muted">{loading ? 'Loading doctors...' : `Showing ${filtered.length} results`}</p>
+            {error && <p className="fd-error" style={{color:'#b91c1c', fontSize:'0.8rem'}}>{error}</p>}
           </div>
 
           <div className="doctor-cards-grid">
-            {filtered.length === 0 && <div className="empty">No matches found.</div>}
+            {!loading && filtered.length === 0 && !error && <div className="empty">No matches found.</div>}
+            {loading && <div className="empty">Loading...</div>}
             {filtered.slice(0, 50).map((d, idx) => {
               const dist = userCoords ? haversineKm(userCoords, d.coords).toFixed(1) : null;
               return (
@@ -176,7 +180,14 @@ export default function FindADoctor() {
                       <div className="speciality">{d.speciality}</div>
                       <div className="card-actions">
                         <button className="profile-link" onClick={(e)=> e.preventDefault()}>View Full Profile</button>
-                        <Button className="book-btn" onClick={() => navigate('/appointment-form', { state:{ doctorName: d.name, speciality: d.specialization } })}>Book an Appointment</Button>
+                        <Button
+                          className="book-btn"
+                          onClick={() => {
+                            navigate('/patient', { state: { active: 'book', doctorName: d.name, speciality: d.specialization } })
+                          }}
+                        >
+                          Book an Appointment
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>

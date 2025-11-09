@@ -4,7 +4,6 @@ import '../styles/doctor-dashboard.scss';
 import PrescribeForm from './doctor/PrescribeForm.jsx';
 import CalendarPane from './doctor/CalendarPane.jsx';
 import AppointmentsPane from './doctor/AppointmentsPane.jsx';
-import data from '../data/appointments.json';
 import MapPicker from './MapPicker.jsx';
 
 export default function DoctorDashboard() {
@@ -22,58 +21,112 @@ export default function DoctorDashboard() {
   const [docLocation, setDocLocation] = useState(initialLoc)
   const [locMsg, setLocMsg] = useState('')
 
-  // Externalized dummy data
-  const appointmentsByDate = data.calendarAppointmentsByDate;
-  const [appointmentRequests, setAppointmentRequests] = useState(() => data.appointmentRequests);
-  const [upcoming, setUpcoming] = useState(() => data.upcoming);
+  // Appointments state populated from backend
+  const [appointmentRequests, setAppointmentRequests] = useState([]); // pending status
+  const [upcoming, setUpcoming] = useState([]); // approved/confirmed
+  const [loadMsg, setLoadMsg] = useState('');
 
-  const [inquiryOpenId, setInquiryOpenId] = useState(null);
-  const [inquiryDrafts, setInquiryDrafts] = useState({});
+  // Fetch doctor appointments
+  async function refreshAppointments() {
+    try {
+      setLoadMsg('');
+      const sess = JSON.parse(localStorage.getItem('session')||'null');
+      const doctorId = sess?.user?._id || sess?.user?.id;
+      if (!doctorId) { setLoadMsg('Missing doctor id'); return; }
+      const token = localStorage.getItem('token');
+      const res = await fetch(apiUrl(`api/appointments?doctorId=${doctorId}`), {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      const json = await res.json();
+      if (!res.ok) { setLoadMsg(json.error || 'Failed to load appointments'); return; }
+      const list = Array.isArray(json) ? json : [];
+      // fetch patient names
+      const ids = Array.from(new Set(list.map(a => a.patientId).filter(Boolean)));
+      const nameMap = {};
+      await Promise.all(ids.map(async (pid) => {
+        try {
+          const r = await fetch(apiUrl(`api/auth/user/${pid}`));
+          if (!r.ok) return;
+          const j = await r.json();
+          const nm = j?.profile?.name || j?.profile?.fullName || j?.email || String(pid).slice(0,6);
+          nameMap[pid] = nm;
+        } catch {}
+      }));
+      const withNames = list.map(a => ({ ...a, patientName: nameMap[a.patientId] || a.patientName }));
+      const pending = withNames.filter(a => a.status === 'pending');
+      const upcomingList = withNames.filter(a => a.status === 'approved' || a.status === 'confirmed');
+      setAppointmentRequests(pending);
+      setUpcoming(upcomingList);
+    } catch (e) {
+      setLoadMsg('Network error while fetching');
+    }
+  }
+  useEffect(() => { refreshAppointments(); }, []);
 
   function compareDateTime(a, b) {
-    return new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`);
+    const aDate = a.date || a.appointmentDate || '';
+    const aTime = a.time || a.appointmentTime || '';
+    const bDate = b.date || b.appointmentDate || '';
+    const bTime = b.time || b.appointmentTime || '';
+    return new Date(`${aDate}T${aTime}`) - new Date(`${bDate}T${bTime}`);
   }
   function formatDate(d) {
     const dt = new Date(d);
     return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' });
   }
 
-  function acceptRequest(id) {
-    setAppointmentRequests(reqs => {
-      const idx = reqs.findIndex(r => r.id === id);
-      if (idx === -1) return reqs;
-      const req = reqs[idx];
-      setUpcoming(prev => [...prev, req].sort(compareDateTime));
-      return [...reqs.slice(0, idx), ...reqs.slice(idx + 1)];
+  async function acceptRequest(id) {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(apiUrl(`api/appointments/${id}/status`), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...(token? { 'Authorization': `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ status: 'confirmed' })
+      });
+      const j = await res.json();
+      if (!res.ok) { console.error(j); return; }
+      refreshAppointments();
+    } catch (e) { console.error(e); }
+  }
+  async function rejectRequest(id) {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(apiUrl(`api/appointments/${id}/status`), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...(token? { 'Authorization': `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ status: 'cancelled' })
+      });
+      const j = await res.json();
+      if (!res.ok) { console.error(j); return; }
+      refreshAppointments();
+    } catch (e) { console.error(e); }
+  }
+
+  // Aggregate upcoming appointments by date for calendar heatmap
+  const appointmentsByDate = useMemo(() => {
+    const map = {};
+    upcoming.forEach(a => {
+      const dateIso = a.appointmentDate ? new Date(a.appointmentDate).toISOString().slice(0,10) : null;
+      if (!dateIso) return;
+      const entry = {
+        date: dateIso,
+        time: a.appointmentTime || '',
+        patient: a.patientName || a.patientId || 'Patient',
+        reason: a.reason
+      };
+      map[dateIso] = map[dateIso] ? [...map[dateIso], entry] : [entry];
     });
-  }
-  function rejectRequest(id) {
-    setAppointmentRequests(reqs => reqs.filter(r => r.id !== id));
-  }
-  function toggleInquiry(id) {
-    setInquiryOpenId(curr => (curr === id ? null : id));
-  }
-  function sendInquiry(id) {
-    const message = inquiryDrafts[id]?.trim();
-    console.log('Inquiry to patient', { requestId: id, message });
-    setInquiryOpenId(null);
-    setInquiryDrafts(d => {
-      const { [id]: _, ...rest } = d;
-      return rest;
-    });
-  }
+    return map;
+  }, [upcoming]);
 
   // Build calendar days for current month
   const calendarDays = useMemo(() => {
     const year = today.getFullYear();
-    const month = today.getMonth(); // 0-index
+    const month = today.getMonth();
     const first = new Date(year, month, 1);
     const last = new Date(year, month + 1, 0);
     const days = [];
-    // Leading blanks (weekday: 0 Sunday .. 6)
-    for (let i = 0; i < first.getDay(); i++) {
-      days.push(null);
-    }
+    for (let i = 0; i < first.getDay(); i++) days.push(null);
     for (let d = 1; d <= last.getDate(); d++) {
       const dateObj = new Date(year, month, d);
       const iso = dateObj.toISOString().slice(0,10);
@@ -128,15 +181,12 @@ export default function DoctorDashboard() {
           <AppointmentsPane
             appointmentRequests={appointmentRequests}
             upcoming={upcoming}
-            inquiryOpenId={inquiryOpenId}
-            inquiryDrafts={inquiryDrafts}
             formatDate={formatDate}
             compareDateTime={compareDateTime}
             rejectRequest={rejectRequest}
             acceptRequest={acceptRequest}
-            toggleInquiry={toggleInquiry}
-            sendInquiry={sendInquiry}
-            onInquiryDraftChange={(id, value) => setInquiryDrafts(d => ({ ...d, [id]: value }))}
+            loadMsg={loadMsg}
+            onRefresh={refreshAppointments}
           />
         )}
         {active === 'location' && (

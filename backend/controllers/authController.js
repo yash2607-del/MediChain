@@ -70,6 +70,20 @@ export const getUserProfile = async (req, res) => {
   }
 }
 
+// Public: get a user's basic info by id
+export const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'Missing id parameter' });
+    const user = await User.findById(id).select('profile role email createdAt');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    return res.json({ id: user._id, role: user.role, email: user.email, profile: user.profile, createdAt: user.createdAt });
+  } catch (err) {
+    console.error('getUserById err', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+}
+
 // Update the authenticated user's location in profile
 export const updateLocation = async (req, res) => {
   try {
@@ -97,3 +111,29 @@ export const updateLocation = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+// Public: fetch all users with role 'doctor'
+export const listDoctors = async (req, res) => {
+  try {
+    const { q, limit } = req.query || {};
+    const query = { role: 'doctor' };
+    // Optional simple text search on profile.name or email
+    if (q && typeof q === 'string' && q.trim()) {
+      const regex = new RegExp(q.trim(), 'i');
+      query.$or = [
+        { email: regex },
+        { 'profile.name': regex },
+        { 'profile.specialization': regex }
+      ];
+    }
+    const lim = Math.max(1, Math.min(Number(limit) || 100, 500));
+    const docs = await User.find(query)
+      .select('-passwordHash')
+      .limit(lim)
+      .lean();
+    return res.json({ ok: true, count: docs.length, items: docs });
+  } catch (err) {
+    console.error('listDoctors err', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+}

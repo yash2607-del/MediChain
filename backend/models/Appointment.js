@@ -1,55 +1,51 @@
 import mongoose from 'mongoose';
 
+// Restructured Appointment schema per new requirements:
+// Only persist doctorId, patientId, appointmentDate, reason, status.
+// Status enum: pending | approved | cancelled (default pending).
+// Use ObjectId refs to maintain linkage between doctor & patient.
 const appointmentSchema = new mongoose.Schema({
+  doctorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false,
+    index: true
+  },
   patientId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
     index: true
   },
-  doctorName: {
-    type: String,
-    required: true
-  },
-  specialty: {
-    type: String,
-    required: false
-  },
   appointmentDate: {
-    type: String,
-    required: true
+    type: Date,
+    required: true,
+    index: true
   },
   appointmentTime: {
     type: String,
-    required: true
+    required: false
   },
-  reasonForVisit: {
+  reason: {
     type: String,
-    default: ''
+    required: true,
+    trim: true
   },
-  additionalNotes: {
+  doctorName: {
     type: String,
-    default: ''
-  },
-  phone: {
-    type: String,
-    default: ''
+    required: false,
+    trim: true
   },
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'cancelled', 'completed'],
-    default: 'pending'
+    enum: ['pending', 'approved', 'confirmed', 'cancelled'],
+    default: 'pending',
+    index: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
-// Update the updatedAt timestamp before saving
 appointmentSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();

@@ -11,9 +11,9 @@ import billingRouter from "./routers/billingRouter.js";
 import pharmacyRouter from "./routers/pharmacyRouter.js";
 import prescriptionRouter from "./routers/prescriptionRouter.js";
 import authRouter from "./routers/authRouter.js";
-import placesRouter from "./routers/locationRouter.js";
 import appointmentRouter from "./routers/appointmentRouter.js"; 
 import placesRouter from "./routers/locationRouter.js"; 
+import scanRouter from "./routers/scanRouter.js";
 
 // Initialize app
 const app = express();

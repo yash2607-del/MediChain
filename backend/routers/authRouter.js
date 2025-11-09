@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, me, updateLocation, getUserProfile } from '../controllers/authController.js';
+import { register, login, me, updateLocation, getUserProfile, getUserById, listDoctors } from '../controllers/authController.js';
 
 const router = express.Router();
 
@@ -9,6 +9,10 @@ router.get('/me', me);
 // Public profile lookup by email (required path param)
 // Example: GET /api/auth/user/jane.doe@example.com/profile
 router.get('/user/:email/profile', getUserProfile);
+// Public: get user by id (basic info)
+router.get('/user/:id', getUserById);
 router.put('/location', updateLocation);
+// Doctors listing (public)
+router.get('/doctors', listDoctors);
 
 export default router;

@@ -27,7 +27,8 @@ export default function PatientAppointments() {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/appointments?patientId=${patientId}`);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      const response = await fetch(`${baseUrl}/api/appointments?patientId=${patientId}`);
       const data = await response.json();
 
       if (!response.ok) {
@@ -45,7 +46,9 @@ export default function PatientAppointments() {
 
   // Separate appointments by status
   const pendingAppointments = appointments.filter(apt => apt.status === 'pending');
-  const confirmedAppointments = appointments.filter(apt => apt.status === 'confirmed');
+  // backend may use 'approved' or 'confirmed' for accepted appointments
+  const confirmedAppointments = appointments.filter(apt => apt.status === 'confirmed' || apt.status === 'approved');
+  const cancelledAppointments = appointments.filter(apt => apt.status === 'cancelled');
 
   const handleCallClinic = (phone) => {
     window.location.href = `tel:${phone}`;
@@ -57,7 +60,8 @@ export default function PatientAppointments() {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/appointments/${appointment._id}/status`, {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      const response = await fetch(`${baseUrl}/api/appointments/${appointment._id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -89,6 +93,15 @@ export default function PatientAppointments() {
     });
   };
 
+  const formatTime = (timeString) => {
+    if (!timeString) return '';
+    const [hours, minutes] = timeString.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
   return (
     <div className="patient-appointments-container">
       <div className="appointments-header">
@@ -118,6 +131,10 @@ export default function PatientAppointments() {
           <div className="stat-number">{confirmedAppointments.length}</div>
           <div className="stat-label">CONFIRMED</div>
         </div>
+        <div className="stat-box cancelled">
+          <div className="stat-number">{cancelledAppointments.length}</div>
+          <div className="stat-label">CANCELLED</div>
+        </div>
       </div>
 
       <div className="appointments-sections">
@@ -140,7 +157,7 @@ export default function PatientAppointments() {
                         <strong>Date:</strong> {formatDate(appointment.appointmentDate)}
                       </div>
                       <div className="meta-item">
-                        <strong>Time:</strong> {appointment.appointmentTime}
+                        <strong>Time:</strong> {formatTime(appointment.appointmentTime)}
                       </div>
                       <div className="meta-item">
                         <strong>Reason:</strong> {appointment.reasonForVisit || 'Not specified'}
@@ -153,19 +170,12 @@ export default function PatientAppointments() {
                     </div>
                   </div>
                   <div className="appointment-actions">
-                    {appointment.phone && (
-                      <button 
-                        className="btn-call"
-                        onClick={() => handleCallClinic(appointment.phone)}
-                      >
-                        <FaPhoneAlt /> Call
-                      </button>
-                    )}
                     <button 
                       className="btn-cancel"
                       onClick={() => handleCancel(appointment)}
                     >
-                      <FaTimes /> Cancel
+                      <FaTimes />
+                      <span>Cancel</span>
                     </button>
                   </div>
                 </div>
@@ -193,10 +203,10 @@ export default function PatientAppointments() {
                         <strong>Date:</strong> {formatDate(appointment.appointmentDate)}
                       </div>
                       <div className="meta-item">
-                        <strong>Time:</strong> {appointment.appointmentTime}
+                        <strong>Time:</strong> {formatTime(appointment.appointmentTime)}
                       </div>
                       <div className="meta-item">
-                        <strong>Reason:</strong> {appointment.reasonForVisit || 'Not specified'}
+                        <strong>Reason:</strong> {appointment.reason || appointment.reasonForVisit || 'Not specified'}
                       </div>
                       {appointment.additionalNotes && (
                         <div className="meta-item">
@@ -206,20 +216,45 @@ export default function PatientAppointments() {
                     </div>
                   </div>
                   <div className="appointment-actions">
-                    {appointment.phone && (
-                      <button 
-                        className="btn-call"
-                        onClick={() => handleCallClinic(appointment.phone)}
-                      >
-                        <FaPhoneAlt /> Call
-                      </button>
-                    )}
                     <button 
                       className="btn-cancel"
                       onClick={() => handleCancel(appointment)}
                     >
-                      <FaTimes /> Cancel
+                      <FaTimes />
+                      <span>Cancel</span>
                     </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Cancelled Appointments Section */}
+        <div className="cancelled-section">
+          <h2>Cancelled Appointments</h2>
+          {cancelledAppointments.length === 0 ? (
+            <p className="empty-message">No cancelled appointments.</p>
+          ) : (
+            <div className="appointments-list">
+              {cancelledAppointments.map((appointment) => (
+                <div key={appointment._id} className="appointment-card confirmed">
+                  <div className="appointment-info">
+                    <div className="doctor-details">
+                      <div className="doctor-name">{appointment.doctorName}</div>
+                      <div className="doctor-speciality">{appointment.specialty || 'General'}</div>
+                    </div>
+                    <div className="appointment-meta">
+                      <div className="meta-item">
+                        <strong>Date:</strong> {formatDate(appointment.appointmentDate)}
+                      </div>
+                      <div className="meta-item">
+                        <strong>Time:</strong> {formatTime(appointment.appointmentTime)}
+                      </div>
+                      <div className="meta-item">
+                        <strong>Reason:</strong> {appointment.reason || appointment.reasonForVisit || 'Not specified'}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

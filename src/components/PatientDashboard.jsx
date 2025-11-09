@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import DashboardLayout from './DashboardLayout.jsx'
 import '../styles/patient-dashboard.scss'
 import FindADoctor from '../pages/Patient/FindADoctor.jsx'
@@ -9,8 +9,23 @@ import ChatbotPopup from './chat/ChatbotPopup.jsx'
 import '../styles/chatbot-popup.scss'
 import { FaUserMd, FaCalendarPlus, FaCalendarCheck, FaPrescriptionBottle } from 'react-icons/fa'
 
+import { useLocation } from 'react-router-dom'
+
 export default function PatientDashboard() {
-  const [active, setActive] = useState('appointments')
+  const location = useLocation()
+  const navState = location.state || {}
+  const initialActive = useMemo(() => (navState.active || 'appointments'), [navState.active])
+  const [active, setActive] = useState(initialActive)
+  const [prefill, setPrefill] = useState({ doctorName: navState.doctorName || '', speciality: navState.speciality || '' })
+
+  useEffect(() => {
+    if (navState.active) setActive(navState.active)
+    if (navState.doctorName || navState.speciality) {
+      setPrefill({ doctorName: navState.doctorName || '', speciality: navState.speciality || '' })
+    }
+    // Clean the history state so refreshing doesn't keep re-triggering
+    window.history.replaceState({}, document.title)
+  }, [navState.active, navState.doctorName, navState.speciality])
 
   const menuItems = [
     { key: 'find-doctor', label: 'Find Doctor', icon: <FaUserMd /> },
@@ -28,7 +43,7 @@ export default function PatientDashboard() {
         setActive={setActive}
       >
         {active === 'find-doctor' && <FindADoctor />}
-        {active === 'book' && <AppointmentForm />}
+  {active === 'book' && <AppointmentForm prefill={prefill} />}
         {active === 'appointments' && <PatientAppointments />}
         {active === 'prescriptions' && <PrescriptionTable />}
       </DashboardLayout>

@@ -1,5 +1,7 @@
 import Appointment from '../models/Appointment.js';
+import User from '../models/User.js';
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
 
 // Check if MongoDB is connected
 function dbConnected() {
@@ -12,34 +14,67 @@ let mockAppointments = [];
 // Create a new appointment
 export const createAppointment = async (req, res) => {
   try {
-    const {
-      patientId,
-      doctorName,
-      specialty,
-      appointmentDate,
-      appointmentTime,
-      reasonForVisit,
-      additionalNotes,
-      status
-    } = req.body;
+    let { doctorId, patientId, appointmentDate, appointmentTime, reason, doctorName, status } = req.body;
+
+    // If auth token present, derive patientId from it (preferred)
+    try {
+      if (!patientId && req.headers?.authorization) {
+        const token = req.headers.authorization.replace(/^Bearer\s+/i, '');
+        const secret = process.env.JWT_SECRET || '';
+        if (token && secret) {
+          const decoded = jwt.verify(token, secret);
+          if (decoded && (decoded.id || decoded._id || decoded.sub)) {
+            patientId = decoded.id || decoded._id || decoded.sub;
+          }
+        }
+      }
+    } catch (e) {
+      // ignore token parse errors, fallback to body.patientId if provided
+    }
 
     // Validation
-    if (!patientId || !doctorName || !appointmentDate || !appointmentTime) {
+    if ((!doctorId && !doctorName) || !patientId || !appointmentDate || !appointmentTime || !reason) {
       return res.status(400).json({
-        error: 'Missing required fields: patientId, doctorName, appointmentDate, appointmentTime'
+        error: 'Missing required fields: doctorId or doctorName, patientId (or provide JWT), appointmentDate, appointmentTime, reason'
       });
     }
 
+    // Validate ObjectId format
+    const isValidObjectId = (val) => mongoose.Types.ObjectId.isValid(val);
+
     if (dbConnected()) {
-      // Save to MongoDB
+      // Resolve doctorId if only doctorName provided
+      if (!doctorId && doctorName) {
+        // try to find doctor user by profile.name or email (case-insensitive)
+        const found = await User.findOne({
+          $or: [
+            { 'profile.name': doctorName },
+            { email: doctorName },
+            { 'profile.email': doctorName }
+          ]
+        }).lean();
+        if (found?._id) {
+          doctorId = found._id;
+        }
+      }
+
+      if (!isValidObjectId(patientId)) {
+        return res.status(400).json({ error: 'patientId must be a valid ObjectId string' });
+      }
+      if (doctorId && !isValidObjectId(doctorId)) {
+        return res.status(400).json({ error: 'doctorId must be a valid ObjectId string' });
+      }
+
+      // Build appointmentDateTime from date + time
+      const dateTime = new Date(`${appointmentDate}T${appointmentTime}`);
+
       const appointment = new Appointment({
-        patientId,
-        doctorName,
-        specialty: specialty || '',
-        appointmentDate,
+        doctorId: doctorId ? new mongoose.Types.ObjectId(doctorId) : undefined,
+        doctorName: doctorName || undefined,
+        patientId: new mongoose.Types.ObjectId(patientId),
+        appointmentDate: dateTime,
         appointmentTime,
-        reasonForVisit: reasonForVisit || '',
-        additionalNotes: additionalNotes || '',
+        reason,
         status: status || 'pending'
       });
 
@@ -52,13 +87,12 @@ export const createAppointment = async (req, res) => {
       // Fallback to in-memory storage
       const newAppointment = {
         _id: 'APT' + Date.now(),
+        doctorId,
+        doctorName: doctorName || undefined,
         patientId,
-        doctorName,
-        specialty: specialty || '',
-        appointmentDate,
+        appointmentDate: `${appointmentDate}T${appointmentTime}`,
         appointmentTime,
-        reasonForVisit: reasonForVisit || '',
-        additionalNotes: additionalNotes || '',
+        reason,
         status: status || 'pending',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -78,17 +112,17 @@ export const createAppointment = async (req, res) => {
 // Get all appointments for a patient
 export const getAppointments = async (req, res) => {
   try {
-    const { patientId } = req.query;
+    const { patientId, doctorId } = req.query;
 
     if (dbConnected()) {
-      const filter = patientId ? { patientId } : {};
-      const appointments = await Appointment.find(filter).sort({ appointmentDate: -1, appointmentTime: -1 });
+      const filter = doctorId ? { doctorId } : (patientId ? { patientId } : {});
+      const appointments = await Appointment.find(filter).sort({ appointmentDate: -1 });
       return res.json(appointments);
     } else {
       // Fallback to in-memory
-      const filtered = patientId
-        ? mockAppointments.filter(a => a.patientId === patientId)
-        : mockAppointments;
+      let filtered = mockAppointments;
+      if (doctorId) filtered = filtered.filter(a => a.doctorId === doctorId);
+      else if (patientId) filtered = filtered.filter(a => a.patientId === patientId);
       return res.json(filtered);
     }
   } catch (err) {
@@ -127,8 +161,8 @@ export const updateAppointmentStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!status || !['pending', 'confirmed', 'cancelled', 'completed'].includes(status)) {
-      return res.status(400).json({ error: 'Invalid status. Must be: pending, confirmed, cancelled, or completed' });
+    if (!status || !['pending', 'approved', 'confirmed', 'cancelled'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status. Must be: pending, approved, confirmed, or cancelled' });
     }
 
     if (dbConnected()) {
