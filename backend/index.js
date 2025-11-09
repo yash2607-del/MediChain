@@ -11,6 +11,7 @@ import billingRouter from "./routers/billingRouter.js";
 import pharmacyRouter from "./routers/pharmacyRouter.js";
 import prescriptionRouter from "./routers/prescriptionRouter.js";
 import authRouter from "./routers/authRouter.js";
+import scanRouter from "./routers/scanRouter.js";
 import placesRouter from "./routers/locationRouter.js"; 
 
 // Initialize app
@@ -37,6 +38,7 @@ app.use("/api/pharmacy", pharmacyRouter);
 app.use("/api/prescriptions", prescriptionRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/places", placesRouter);
+app.use("/api/scan", scanRouter);
 // Root endpoint
 app.get("/", (req, res) => {
   res.send(" MediChain backend running successfully!");

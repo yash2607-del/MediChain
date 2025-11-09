@@ -15,6 +15,7 @@ export default function PrescribeForm() {
   const [conditions, setConditions] = useState([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+  // Renamed conceptually to Diagnosis in UI; keeping variable name notes for backend compatibility
   const [notes, setNotes] = useState('');
   const [medicines, setMedicines] = useState([
     { 
@@ -30,6 +31,17 @@ export default function PrescribeForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [created, setCreated] = useState(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [selectedPrescription, setSelectedPrescription] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+
+  // Patient history & detail state (fetched from backend)
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState(null);
+  const [historyItems, setHistoryItems] = useState([]);
+
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState(null);
 
   function updateMedicine(id, field, value) {
     setMedicines(meds => meds.map(m => m.id === id ? { ...m, [field]: value } : m));
@@ -59,7 +71,7 @@ export default function PrescribeForm() {
     setWeight('');
     setHeight('');
     setConditions([]);
-    setNotes('');
+  setNotes('');
     setMedicines([{ 
       id: crypto.randomUUID(), 
       name: '', 
@@ -69,6 +81,71 @@ export default function PrescribeForm() {
       totalDays: '' 
     }]);
     setSubmitted(false);
+  }
+
+  function openHistoryModalAndFetch() {
+    setShowHistoryModal(true);
+    setHistoryError(null);
+    setHistoryItems([]);
+    const email = (patientEmail || '').trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      setHistoryError('Enter a valid patient email to fetch history');
+      return;
+    }
+    setHistoryLoading(true);
+    (async () => {
+      try {
+        const base = import.meta.env.VITE_API_BASE_URL || '/';
+        const url = new URL(`api/prescriptions?email=${encodeURIComponent(email)}`, base).toString();
+        const res = await fetch(url, { method: 'GET' });
+        const text = await res.text();
+        let data = {};
+        try { data = text ? JSON.parse(text) : {}; } catch (_) { data = {}; }
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        setHistoryItems(Array.isArray(data.items) ? data.items : []);
+      } catch (e) {
+        console.error('Fetch history failed', e);
+        setHistoryError(e.message || 'Failed to fetch patient history');
+      } finally {
+        setHistoryLoading(false);
+      }
+    })();
+  }
+
+  async function openDetailAndFetch(id) {
+    setDetailError(null);
+    setDetailLoading(true);
+    setShowDetailModal(true);
+    try {
+      const base = import.meta.env.VITE_API_BASE_URL || '/';
+      const url = new URL(`api/prescriptions/${encodeURIComponent(id)}`, base).toString();
+      const res = await fetch(url, { method: 'GET' });
+      const text = await res.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch (_) { data = {}; }
+      // Even if status is 409 (tampered), we still want to display details from the payload
+      if (!res.ok && res.status !== 409) throw new Error(data.error || `HTTP ${res.status}`);
+
+      // Shape expected: { ok, verified, reason?, id, storedHash, computedHash, onChainVerified, canonical, doc }
+      const merged = {
+        ok: !!data.ok,
+        verified: data.verified === true,
+        reason: data.reason || null,
+        id: data.id,
+        storedHash: data.storedHash,
+        computedHash: data.computedHash,
+        onChainVerified: typeof data.onChainVerified === 'boolean' ? data.onChainVerified : null,
+        canonical: data.canonical,
+        doc: data.doc || null
+      };
+      setSelectedPrescription(merged);
+    } catch (e) {
+      console.error('Fetch detail failed', e);
+      setDetailError(e.message || 'Failed to fetch prescription detail');
+      setSelectedPrescription(null);
+    } finally {
+      setDetailLoading(false);
+    }
   }
 
   function handleSubmit(e) {
@@ -86,6 +163,7 @@ export default function PrescribeForm() {
       age: age ? parseInt(age,10) : null,
       sex,
       medicines: medicines.filter(m => m.name && String(m.name).trim()),
+      // Sending as notes to backend; conceptually 'diagnosis'
       notes
     };
 
@@ -241,7 +319,23 @@ export default function PrescribeForm() {
     <form className="prescribe-form" onSubmit={handleSubmit}>
       {/* Patient meta two-row grid (show most profile fields except sensitive ones) */}
       <div className="patient-meta">
-        <h4 style={{ marginBottom: 8 }}>Patient Information</h4>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h4 style={{ marginBottom: 8 }}>Patient Information</h4>
+          <div>
+            <button
+              type="button"
+              onClick={openHistoryModalAndFetch}
+              className="add-btn"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <path d="M21 12.5A8.5 8.5 0 1 1 12.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 7v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Patient History
+            </button>
+          </div>
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
           <div className="field">
             <label>Name</label>
@@ -369,8 +463,8 @@ export default function PrescribeForm() {
       </div>
 
       <div className="field">
-        <label>Other Actions / Notes</label>
-        <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} placeholder="Diet changes, tests to schedule, follow-up timeframe..." />
+        <label>Diagnosis</label>
+        <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={4} placeholder="Primary diagnosis, clinical notes, plan..." />
       </div>
 
       <div className="form-actions">
@@ -438,6 +532,119 @@ export default function PrescribeForm() {
             <div style={{ textAlign: 'right' }}>
               <button type="button" onClick={() => setShowSuccessModal(false)} className="secondary-btn">Close</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Patient History Modal (list) */}
+      {showHistoryModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000 }}
+          onClick={() => setShowHistoryModal(false)}
+        >
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', padding: 16, borderRadius: 8, width: '90%', maxWidth: 900 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <h4 style={{ margin: 0 }}>Patient History</h4>
+              <button onClick={() => setShowHistoryModal(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ minHeight: 40, marginBottom: 8 }}>
+              {historyLoading && <span>Loading...</span>}
+              {historyError && <span style={{ color: '#b91c1c' }}>{historyError}</span>}
+            </div>
+            <div style={{ maxHeight: '60vh', overflow: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
+                    <th style={{ padding: '8px' }}>Date</th>
+                    <th style={{ padding: '8px' }}>Medicines</th>
+                    <th style={{ padding: '8px' }}>Diagnosis</th>
+                    <th style={{ padding: '8px' }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historyItems.map(p => (
+                    <tr key={p._id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                      <td style={{ padding: '8px' }}>{p.createdAt ? new Date(p.createdAt).toLocaleString() : ''}</td>
+                      <td style={{ padding: '8px' }}>{Array.isArray(p.medicines) ? p.medicines.length : 0}</td>
+                      <td style={{ padding: '8px' }}>{p.notes ? (p.notes.length > 60 ? p.notes.slice(0, 57) + '...' : p.notes) : ''}</td>
+                      <td style={{ padding: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => openDetailAndFetch(p._id)}
+                          style={{ padding: '6px 10px', cursor: 'pointer' }}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {(!historyLoading && !historyError && historyItems.length === 0) && (
+                    <tr>
+                      <td colSpan={4} style={{ padding: '12px', textAlign: 'center', color: '#6b7280' }}>No prescriptions found.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Patient History Detail Modal */}
+      {showDetailModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10001 }}
+          onClick={() => { setShowDetailModal(false); setSelectedPrescription(null); }}
+        >
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', padding: 18, borderRadius: 8, width: '92%', maxWidth: 720, maxHeight: '80vh', overflow: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h4 style={{ margin: 0 }}>Prescription Details</h4>
+              <button onClick={() => { setShowDetailModal(false); setSelectedPrescription(null); }} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ minHeight: 28, marginTop: 8 }}>
+              {detailLoading && <span>Loading...</span>}
+              {detailError && <span style={{ color: '#b91c1c' }}>{detailError}</span>}
+            </div>
+            {selectedPrescription && selectedPrescription.doc && !detailLoading && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                  {selectedPrescription.verified ? (
+                    <span style={{ background: '#def7ec', color: '#03543f', padding: '2px 8px', borderRadius: 999, fontSize: 12 }}>Verified</span>
+                  ) : (
+                    <span style={{ background: '#fde8e8', color: '#9b1c1c', padding: '2px 8px', borderRadius: 999, fontSize: 12 }}>Tampered</span>
+                  )}
+                  {typeof selectedPrescription.onChainVerified === 'boolean' && (
+                    <span style={{ fontSize: 12, color: '#4b5563' }}>
+                      On-chain: {selectedPrescription.onChainVerified ? 'present' : 'not found'}
+                    </span>
+                  )}
+                </div>
+                <div style={{ marginBottom: 8 }}><strong>Date:</strong> {selectedPrescription.doc.createdAt ? new Date(selectedPrescription.doc.createdAt).toLocaleString() : ''}</div>
+                <div style={{ marginBottom: 8 }}><strong>Patient:</strong> {selectedPrescription.doc.patientName} &lt;{selectedPrescription.doc.patientEmail || '—'}&gt;</div>
+                <div style={{ marginTop: 8 }}>
+                  <strong>Medicines</strong>
+                  <ul>
+                    {Array.isArray(selectedPrescription.doc.medicines) && selectedPrescription.doc.medicines.map((m, idx) => (
+                      <li key={idx}>{m.name} — {m.dosageValue}{m.dosageUnit ? ' ' + m.dosageUnit : ''} — {m.timesPerDay}x/day for {m.totalDays} days</li>
+                    ))}
+                  </ul>
+                </div>
+                {selectedPrescription.doc.notes && (
+                  <div style={{ marginTop: 8 }}>
+                    <strong>Diagnosis</strong>
+                    <div style={{ marginTop: 4 }}>{selectedPrescription.doc.notes}</div>
+                  </div>
+                )}
+                <div style={{ marginTop: 12, fontSize: 12, color: '#4b5563' }}>
+                  <div><strong>Stored Hash:</strong> {selectedPrescription.storedHash || '—'}</div>
+                  <div><strong>Computed Hash:</strong> {selectedPrescription.computedHash || '—'}</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

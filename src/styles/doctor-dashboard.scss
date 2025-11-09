@@ -275,6 +275,15 @@
   h2 { margin-top: 0; color: #012; }
   p { color: rgba(1, 18, 34, 0.8); }
 }
+.add-btn {
+      background: var(--color-3);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+    }
 
 // Prescribe form styles
 .prescribe-pane { display:flex; flex-direction:column; gap:0.75rem; }
