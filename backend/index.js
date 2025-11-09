@@ -39,11 +39,8 @@ app.use("/api/pharmacy", pharmacyRouter);
 app.use("/api/prescriptions", prescriptionRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/places", placesRouter);
-<<<<<<< HEAD
 app.use("/api/appointments", appointmentRouter);
-=======
 app.use("/api/scan", scanRouter);
->>>>>>> 1b363d5e67cc2f98e090d713d7731bd8d6267338
 // Root endpoint
 app.get("/", (req, res) => {
   res.send(" MediChain backend running successfully!");
