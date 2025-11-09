@@ -1,57 +1,81 @@
 .prescribe-form-page {
   min-height: 100vh;
-  background: var(--color-bg-light, #F9FBFC);
-  padding: 2rem;
+  background: linear-gradient(135deg, #F9FBFC 0%, #CDF5FD 100%);
+  padding: 3rem 2rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }
 
 .prescribe-form-container {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
 /* Header */
 .form-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
+  text-align: center;
 }
 
 .form-header h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 0.5rem 0;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: -0.02em;
 }
 
 .form-header p {
-  font-size: 0.95rem;
-  color: #6b7280;
+  font-size: 1.1rem;
+  color: #64748b;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 /* Form */
 .prescribe-form {
   background: #ffffff;
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 40px rgba(0, 169, 255, 0.1);
+  border: 2px solid #E5E7EB;
 }
 
 /* Form Sections */
 .form-section {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #ffffff 0%, #F9FBFC 100%);
+  border-radius: 16px;
+  border: 2px solid #CDF5FD;
 }
 
 .section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #CDF5FD;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-title::before {
+  content: '📋';
+  font-size: 1.5rem;
 }
 
 /* Appointment Details Section */
 .appointment-details-section {
-  background: #f9fafb;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #CDF5FD 0%, #F9FBFC 100%);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 2px solid #89CFF3;
+}
+
+.appointment-details-section .section-title::before {
+  content: '📝';
 }
 
 .section-header {
@@ -76,39 +100,44 @@
 
 .form-group label {
   font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
+  font-weight: 600;
+  color: #0F172A;
   margin-bottom: 0.5rem;
 }
 
 .required {
-  color: #ef4444;
+  color: #E74C3C;
   margin-left: 2px;
+  font-weight: 700;
 }
 
 /* Input Fields */
 input[type="text"],
 input[type="date"],
+input[type="tel"],
 select,
 textarea {
   width: 100%;
-  padding: 0.625rem 0.875rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
   font-size: 0.875rem;
-  color: #1f2937;
+  color: #0F172A;
   background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
   font-family: inherit;
 }
 
 input[type="text"]:focus,
 input[type="date"]:focus,
+input[type="tel"]:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: var(--color-3, #00A9FF);
-  box-shadow: 0 0 0 3px rgba(0, 169, 255, 0.1);
+  border-color: #00A9FF;
+  box-shadow: 0 0 0 4px rgba(0, 169, 255, 0.15);
+  transform: translateY(-1px);
 }
 
 input::placeholder,
@@ -119,13 +148,14 @@ textarea::placeholder {
 input.error,
 select.error,
 textarea.error {
-  border-color: #ef4444;
+  border-color: #E74C3C;
+  background: #FEF2F2;
 }
 
 input.error:focus,
 select.error:focus,
 textarea.error:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.15);
 }
 
 /* Select Dropdown */
@@ -148,8 +178,9 @@ textarea {
 
 /* Error Messages */
 .error-message {
-  color: #ef4444;
+  color: #E74C3C;
   font-size: 0.75rem;
+  font-weight: 600;
   margin-top: 0.25rem;
   display: block;
 }
@@ -160,29 +191,33 @@ textarea {
   gap: 1rem;
   margin-top: 2.5rem;
   padding-top: 2rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 2px solid #CDF5FD;
+  justify-content: center;
 }
 
 .btn {
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2.5rem;
   border: none;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   font-family: inherit;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .btn-primary {
-  background: var(--color-3, #00A9FF);
+  background: linear-gradient(135deg, #00A9FF, #89CFF3);
   color: #ffffff;
+  border: 2px solid transparent;
+  min-width: 200px;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #0088cc;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 169, 255, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 169, 255, 0.35);
+  background: linear-gradient(135deg, #0088cc, #6BB8E0);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -190,18 +225,24 @@ textarea {
 }
 
 .btn-primary:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-secondary {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #64748b;
+  border: 2px solid #E5E7EB;
+  min-width: 150px;
 }
 
 .btn-secondary:hover {
-  background: #e5e7eb;
+  background: #F9FBFC;
+  border-color: #00A9FF;
+  color: #00A9FF;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 169, 255, 0.15);
   border-color: #9ca3af;
 }
 
@@ -218,15 +259,23 @@ textarea {
 
 @media (max-width: 768px) {
   .prescribe-form-page {
-    padding: 1.5rem 1rem;
+    padding: 2rem 1rem;
+  }
+
+  .prescribe-form {
+    padding: 1.5rem;
   }
 
   .form-header h1 {
-    font-size: 1.75rem;
+    font-size: 2rem;
   }
 
   .form-header p {
-    font-size: 0.875rem;
+    font-size: 1rem;
+  }
+
+  .form-section {
+    padding: 1.5rem;
   }
 
   .form-row {
@@ -235,7 +284,7 @@ textarea {
   }
 
   .appointment-details-section {
-    padding: 1.25rem;
+    padding: 1.5rem;
   }
 
   .form-actions {
@@ -249,11 +298,15 @@ textarea {
 
 @media (max-width: 480px) {
   .prescribe-form-page {
-    padding: 1rem 0.75rem;
+    padding: 1.5rem 0.75rem;
   }
 
   .form-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+  }
+
+  .section-title {
+    font-size: 1.125rem;
   }
 }
 

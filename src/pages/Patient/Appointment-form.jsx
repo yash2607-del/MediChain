@@ -12,6 +12,7 @@ export default function AppointmentForm() {
     appointmentTime: "",
     reasonForVisit: "",
     additionalNotes: "",
+    phone: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -41,6 +42,7 @@ export default function AppointmentForm() {
       appointmentTime: "",
       reasonForVisit: "",
       additionalNotes: "",
+      phone: "",
     });
     setErrors({});
   };
@@ -77,13 +79,54 @@ export default function AppointmentForm() {
 
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Appointment Form Data:", formData);
-      alert("Appointment request submitted successfully! We will contact you shortly to confirm.");
-      setIsSubmitting(false);
+    try {
+      // Get patient ID from session
+      const session = JSON.parse(localStorage.getItem('session') || '{}');
+      const patientId = session?.user?.id || session?.user?._id || session?.user?.email;
+      
+      if (!patientId) {
+        alert('Please login to book an appointment');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Prepare appointment data
+      const appointmentData = {
+        patientId,
+        doctorName: formData.doctorName,
+        specialty: formData.speciality,
+        appointmentDate: formData.appointmentDate,
+        appointmentTime: formData.appointmentTime,
+        reasonForVisit: formData.reasonForVisit,
+        additionalNotes: formData.additionalNotes,
+        phone: formData.phone,
+        status: 'pending'
+      };
+
+      // Call backend API
+      const response = await fetch('http://localhost:5000/api/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(appointmentData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to book appointment');
+      }
+
+      console.log("Appointment created:", data.appointment);
+      alert(`Appointment booked successfully!\nAppointment ID: ${data.appointment._id}\nStatus: ${data.appointment.status}\n\nWe will contact you shortly to confirm.`);
       handleReset();
-    }, 1500);
+    } catch (error) {
+      console.error('Error booking appointment:', error);
+      alert(`Failed to book appointment: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   return (
     <div className="prescribe-form-page">
@@ -190,6 +233,18 @@ export default function AppointmentForm() {
                 {errors.appointmentTime && (
                   <span className="error-message">{errors.appointmentTime}</span>
                 )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="phone">Contact Phone</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="e.g. +1 (555) 123-4567"
+                />
               </div>
             </div>
           </div>

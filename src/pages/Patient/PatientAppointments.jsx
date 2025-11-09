@@ -1,73 +1,82 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaPhoneAlt, FaTimes } from 'react-icons/fa';
 import './PatientAppointments.css';
 
 export default function PatientAppointments() {
-  // Dummy pending appointments data
-  const pendingAppointments = [
-    {
-      id: 1,
-      doctorName: 'Dr. Arjun Mehta',
-      speciality: 'Cardiology',
-      date: '2024-11-11',
-      time: '10:30',
-      reason: 'Heart checkup',
-      phone: '+1 (555) 123-4567',
-      clinic: 'City Heart Clinic'
-    },
-    {
-      id: 2,
-      doctorName: 'Dr. Sanya Kapoor',
-      speciality: 'Dermatology',
-      date: '2024-11-11',
-      time: '12:00',
-      reason: 'Skin consultation',
-      phone: '+1 (555) 234-5678',
-      clinic: 'Skin Care Center'
-    },
-    {
-      id: 3,
-      doctorName: 'Dr. Ishaan Rao',
-      speciality: 'Orthopaedics',
-      date: '2024-11-12',
-      time: '09:15',
-      reason: 'Follow-up',
-      phone: '+1 (555) 345-6789',
-      clinic: 'Bone & Joint Hospital'
-    }
-  ];
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Dummy confirmed appointments data
-  const confirmedAppointments = [
-    {
-      id: 4,
-      doctorName: 'Dr. Neha Iyer',
-      speciality: 'Allergy',
-      date: '2024-11-10',
-      time: '16:00',
-      reason: 'Allergy testing',
-      phone: '+1 (555) 456-7890',
-      clinic: 'Allergy Specialists'
-    },
-    {
-      id: 5,
-      doctorName: 'Dr. Kabir Khan',
-      speciality: 'General Medicine',
-      date: '2024-11-11',
-      time: '09:00',
-      reason: 'Annual physical',
-      phone: '+1 (555) 567-8901',
-      clinic: 'Health Plus Clinic'
+  // Fetch appointments from backend
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Get patient ID from session
+      const session = JSON.parse(localStorage.getItem('session') || '{}');
+      const patientId = session?.user?.id || session?.user?._id || session?.user?.email;
+      
+      if (!patientId) {
+        setError('Please login to view appointments');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/appointments?patientId=${patientId}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch appointments');
+      }
+
+      setAppointments(data);
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // Separate appointments by status
+  const pendingAppointments = appointments.filter(apt => apt.status === 'pending');
+  const confirmedAppointments = appointments.filter(apt => apt.status === 'confirmed');
 
   const handleCallClinic = (phone) => {
     window.location.href = `tel:${phone}`;
   };
 
-  const handleCancel = (appointment) => {
-    if (confirm(`Are you sure you want to cancel your appointment with ${appointment.doctorName}?`)) {
+  const handleCancel = async (appointment) => {
+    if (!confirm(`Are you sure you want to cancel your appointment with ${appointment.doctorName}?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/appointments/${appointment._id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'cancelled' })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to cancel appointment');
+      }
+
       alert(`Appointment with ${appointment.doctorName} has been cancelled.`);
+      // Refresh appointments list
+      fetchAppointments();
+    } catch (err) {
+      console.error('Error cancelling appointment:', err);
+      alert(`Failed to cancel appointment: ${err.message}`);
     }
   };
 
@@ -86,6 +95,20 @@ export default function PatientAppointments() {
         <h1>My Appointments</h1>
       </div>
 
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '2rem', fontSize: '1.1rem', color: '#64748b' }}>
+          Loading appointments...
+        </div>
+      )}
+
+      {error && (
+        <div style={{ textAlign: 'center', padding: '2rem', fontSize: '1.1rem', color: '#dc2626', background: '#fee2e2', borderRadius: '8px', margin: '1rem 0' }}>
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && (
+        <>
       <div className="appointments-stats">
         <div className="stat-box pending">
           <div className="stat-number">{pendingAppointments.length}</div>
@@ -106,34 +129,38 @@ export default function PatientAppointments() {
           ) : (
             <div className="appointments-list">
               {pendingAppointments.map((appointment) => (
-                <div key={appointment.id} className="appointment-card pending">
+                <div key={appointment._id} className="appointment-card pending">
                   <div className="appointment-info">
                     <div className="doctor-details">
                       <div className="doctor-name">{appointment.doctorName}</div>
-                      <div className="doctor-speciality">{appointment.speciality}</div>
+                      <div className="doctor-speciality">{appointment.specialty || 'General'}</div>
                     </div>
                     <div className="appointment-meta">
                       <div className="meta-item">
-                        <strong>Date:</strong> {formatDate(appointment.date)}
+                        <strong>Date:</strong> {formatDate(appointment.appointmentDate)}
                       </div>
                       <div className="meta-item">
-                        <strong>Time:</strong> {appointment.time}
+                        <strong>Time:</strong> {appointment.appointmentTime}
                       </div>
                       <div className="meta-item">
-                        <strong>Clinic:</strong> {appointment.clinic}
+                        <strong>Reason:</strong> {appointment.reasonForVisit || 'Not specified'}
                       </div>
-                      <div className="meta-item">
-                        <strong>Reason:</strong> {appointment.reason}
-                      </div>
+                      {appointment.additionalNotes && (
+                        <div className="meta-item">
+                          <strong>Notes:</strong> {appointment.additionalNotes}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="appointment-actions">
-                    <button 
-                      className="btn-call"
-                      onClick={() => handleCallClinic(appointment.phone)}
-                    >
-                      <FaPhoneAlt /> Call
-                    </button>
+                    {appointment.phone && (
+                      <button 
+                        className="btn-call"
+                        onClick={() => handleCallClinic(appointment.phone)}
+                      >
+                        <FaPhoneAlt /> Call
+                      </button>
+                    )}
                     <button 
                       className="btn-cancel"
                       onClick={() => handleCancel(appointment)}
@@ -155,34 +182,38 @@ export default function PatientAppointments() {
           ) : (
             <div className="appointments-list">
               {confirmedAppointments.map((appointment) => (
-                <div key={appointment.id} className="appointment-card confirmed">
+                <div key={appointment._id} className="appointment-card confirmed">
                   <div className="appointment-info">
                     <div className="doctor-details">
                       <div className="doctor-name">{appointment.doctorName}</div>
-                      <div className="doctor-speciality">{appointment.speciality}</div>
+                      <div className="doctor-speciality">{appointment.specialty || 'General'}</div>
                     </div>
                     <div className="appointment-meta">
                       <div className="meta-item">
-                        <strong>Date:</strong> {formatDate(appointment.date)}
+                        <strong>Date:</strong> {formatDate(appointment.appointmentDate)}
                       </div>
                       <div className="meta-item">
-                        <strong>Time:</strong> {appointment.time}
+                        <strong>Time:</strong> {appointment.appointmentTime}
                       </div>
                       <div className="meta-item">
-                        <strong>Clinic:</strong> {appointment.clinic}
+                        <strong>Reason:</strong> {appointment.reasonForVisit || 'Not specified'}
                       </div>
-                      <div className="meta-item">
-                        <strong>Reason:</strong> {appointment.reason}
-                      </div>
+                      {appointment.additionalNotes && (
+                        <div className="meta-item">
+                          <strong>Notes:</strong> {appointment.additionalNotes}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="appointment-actions">
-                    <button 
-                      className="btn-call"
-                      onClick={() => handleCallClinic(appointment.phone)}
-                    >
-                      <FaPhoneAlt /> Call
-                    </button>
+                    {appointment.phone && (
+                      <button 
+                        className="btn-call"
+                        onClick={() => handleCallClinic(appointment.phone)}
+                      >
+                        <FaPhoneAlt /> Call
+                      </button>
+                    )}
                     <button 
                       className="btn-cancel"
                       onClick={() => handleCancel(appointment)}
@@ -196,6 +227,8 @@ export default function PatientAppointments() {
           )}
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }
