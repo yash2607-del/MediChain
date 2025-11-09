@@ -17,6 +17,7 @@ const MedicineSchema = new Schema(
 const PrescriptionSchema = new Schema({
   patientName: { type: String, required: true },
   patientEmail: { type: String },
+  doctorName: { type: String },
   age: { type: Number },
   sex: { type: String },
   medicines: { type: [MedicineSchema], default: [] },

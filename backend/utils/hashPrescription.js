@@ -15,6 +15,7 @@ export function hashPrescription(data) {
   const core = {
     patientName: data.patientName || '',
     patientEmail: data.patientEmail || '',
+    doctorName: data.doctorName || '',
     age: typeof data.age === 'number' ? data.age : null,
     sex: data.sex || '',
     medicines: Array.isArray(data.medicines)

@@ -18,7 +18,12 @@ export async function addPrescription(req, res) {
     const errMsg = validatePrescription(req.body)
     if (errMsg) return res.status(400).json({ error: errMsg })
 
-    const { patientName, patientEmail, age, sex, medicines, notes } = req.body
+  const { patientName, patientEmail, age, sex, medicines, notes } = req.body
+
+  // Determine doctorName from authenticated user context if available
+  // Assume req.user populated by auth middleware; fallback to body.doctorName if explicitly provided
+  const doctorProfileName = req.user?.profile?.name || req.user?.name || req.body.doctorName || ''
+  const doctorName = doctorProfileName ? (doctorProfileName.toLowerCase().startsWith('dr') ? doctorProfileName : `Dr. ${doctorProfileName}`) : ''
 
     const normalized = {
       patientName,
@@ -33,7 +38,8 @@ export async function addPrescription(req, res) {
         timesPerDay: typeof m.timesPerDay === 'string' ? Number(m.timesPerDay) : m.timesPerDay,
         totalDays: typeof m.totalDays === 'string' ? Number(m.totalDays) : m.totalDays
       })) : [],
-      notes
+      notes,
+      doctorName
     }
 
     // Compute canonical hash of core data
@@ -91,6 +97,7 @@ export async function getPrescriptionByIdWithVerify(req, res) {
     const core = {
       patientName: doc.patientName,
       patientEmail: doc.patientEmail,
+      doctorName: doc.doctorName || '',
       age: typeof doc.age === 'number' ? doc.age : (doc.age == null ? null : Number(doc.age)),
       sex: doc.sex,
       medicines: Array.isArray(doc.medicines)

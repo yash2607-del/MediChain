@@ -157,6 +157,16 @@ export default function PrescribeForm() {
     setError(null);
     setLoading(true);
 
+    // Derive doctorName from session (localStorage) so backend receives explicit field
+    let doctorName = '';
+    try {
+      const sess = JSON.parse(localStorage.getItem('session')||'null');
+      const rawName = sess?.user?.profile?.name || sess?.user?.name || '';
+      if (rawName) {
+        doctorName = rawName.toLowerCase().startsWith('dr') ? rawName : `Dr. ${rawName}`;
+      }
+    } catch {}
+
     const payload = {
       patientName,
       patientEmail,
@@ -164,7 +174,8 @@ export default function PrescribeForm() {
       sex,
       medicines: medicines.filter(m => m.name && String(m.name).trim()),
       // Sending as notes to backend; conceptually 'diagnosis'
-      notes
+      notes,
+      doctorName
     };
 
     const base = import.meta.env.VITE_API_BASE_URL || '/';
