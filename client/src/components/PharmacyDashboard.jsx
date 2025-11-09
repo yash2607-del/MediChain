@@ -51,7 +51,7 @@ export default function PharmacyDashboard() {
   return (
     <div className="pharmacy-dashboard">
       <DashboardLayout
-        brand="Pharmacy"
+        brand="MediChain"
         menuItems={menuItems}
         active={active}
         setActive={setActive}

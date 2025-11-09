@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import '../styles/doctor-dashboard.scss'
 import { FaPills, FaCalendarAlt, FaClipboardList } from 'react-icons/fa'
+import logo from '../assets/medichain-logo.png'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function DashboardLayout({ brand = 'MediChain', menuItems = [], active, setActive, children }) {
@@ -77,7 +78,10 @@ export default function DashboardLayout({ brand = 'MediChain', menuItems = [], a
             <span />
             <span />
           </button>
-          <div className="brand">{brand}</div>
+          <div className="brand" style={{display:'flex',alignItems:'center',gap:'0.5rem'}}>
+            <img src={logo} alt="MediChain logo" style={{height:30,width:'auto'}} />
+            <span>MediChain</span>
+          </div>
         </div>
 
         <div className="profile" onClick={() => setProfileOpen(o => !o)}>

@@ -4,7 +4,6 @@ import '../styles/doctor-dashboard.scss';
 import PrescribeForm from './doctor/PrescribeForm.jsx';
 import CalendarPane from './doctor/CalendarPane.jsx';
 import AppointmentsPane from './doctor/AppointmentsPane.jsx';
-import MapPicker from './MapPicker.jsx';
 
 export default function DoctorDashboard() {
   // Helper to build API URLs from env
@@ -13,13 +12,9 @@ export default function DoctorDashboard() {
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(() => today.toISOString().slice(0,10));
 
-  // Location state for doctor
   const session = useMemo(() => {
     try { return JSON.parse(localStorage.getItem('session')||'null') } catch { return null }
   }, [])
-  const initialLoc = session?.user?.profile?.location || null
-  const [docLocation, setDocLocation] = useState(initialLoc)
-  const [locMsg, setLocMsg] = useState('')
 
   // Appointments state populated from backend
   const [appointmentRequests, setAppointmentRequests] = useState([]); // pending status
@@ -149,8 +144,7 @@ export default function DoctorDashboard() {
   const menuItems = [
     { key: 'prescribe', label: 'Prescribe' },
     { key: 'calendar', label: 'Calendar' },
-    { key: 'appointments', label: 'Appointments' },
-    { key: 'location', label: 'Location' }
+    { key: 'appointments', label: 'Appointments' }
   ];
 
   return (
@@ -188,39 +182,6 @@ export default function DoctorDashboard() {
             loadMsg={loadMsg}
             onRefresh={refreshAppointments}
           />
-        )}
-        {active === 'location' && (
-          <section className="profile-section">
-            <h2>Practice Location</h2>
-            {locMsg && <div className="auth-message" style={{marginBottom:8}}>{locMsg}</div>}
-            <MapPicker label="Location" value={docLocation} onChange={setDocLocation} height={260} />
-            {docLocation?.address && <div style={{marginTop:8}}><strong>Address:</strong> {docLocation.address}</div>}
-            <div style={{marginTop:12}}>
-              <button
-                className="btn primary"
-                onClick={async () => {
-                  setLocMsg('')
-                  if (!docLocation?.lat || !docLocation?.lng || !docLocation?.address) { setLocMsg('Pick a location first'); return }
-                  try {
-                    const token = localStorage.getItem('token')
-                    const res = await fetch(apiUrl('api/auth/location'), {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                      body: JSON.stringify({ lat: docLocation.lat, lng: docLocation.lng, address: docLocation.address })
-                    })
-                    const data = await res.json()
-                    if (!res.ok) { setLocMsg(data.error || 'Failed to save location'); return }
-                    // update session cache
-                    const sess = JSON.parse(localStorage.getItem('session')||'null')
-                    if (sess?.user) { sess.user.profile = data.profile; localStorage.setItem('session', JSON.stringify(sess)) }
-                    setLocMsg('Location saved')
-                  } catch (e) {
-                    setLocMsg('Network error while saving')
-                  }
-                }}
-              >Save Location</button>
-            </div>
-          </section>
         )}
       </DashboardLayout>
     </div>
