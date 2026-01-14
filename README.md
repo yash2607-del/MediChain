@@ -1,8 +1,8 @@
-# 🩺 MediChain — Blockchain-Enabled Healthcare Ecosystem
+#  MediChain — Blockchain-Enabled Healthcare Ecosystem
 
 A secure, AI-powered, and blockchain-backed web application connecting patients, doctors, and pharmacies through verified prescriptions, intelligent health insights, and real-time medicine discovery.
 
-## 🚀 Overview
+##  Overview
 
 MediChain is a decentralized healthcare management platform that securely connects patients, doctors, and pharmacies within a unified, transparent ecosystem. It leverages blockchain technology for tamper-proof prescription storage and generative AI for intelligent symptom classification and doctor recommendations.
 
