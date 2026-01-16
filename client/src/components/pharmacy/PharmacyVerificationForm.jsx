@@ -215,22 +215,26 @@ export default function PharmacyVerificationForm() {
           Upload a clear photo or scan of your drug license and any other required licenses. Framed photos are acceptable.
         </p>
         {licenses.map((lic, idx) => (
-          <div key={lic.id} className="doc-row" style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap' }}>
-            <label className="field" style={{ flex: '1 1 180px' }}>
+          <div key={lic.id} className="doc-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto auto', gap: '1rem', alignItems: 'end', marginBottom: '1rem' }}>
+            <label className="field">
               <span>License Type</span>
-              <input type="text" value={lic.name} onChange={e => updateLicense(lic.id, 'name', e.target.value)} placeholder="Drug License, Retail License, etc." />
+              <input type="text" value={lic.name} onChange={e => updateLicense(lic.id, 'name', e.target.value)} placeholder="Drug License, Retail License, etc." style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #ccc', borderRadius: 6 }} />
             </label>
-            <label className="field" style={{ flex: '1 1 200px' }}>
+            <label className="field">
               <span>Upload Document</span>
-              <input type="file" accept="image/*,.pdf" onChange={e => handleLicenseFile(lic.id, e.target.files?.[0])} />
+              <input type="file" accept="image/*,.pdf" onChange={e => handleLicenseFile(lic.id, e.target.files?.[0])} style={{ width: '100%' }} />
             </label>
-            {lic.preview && (
-              <div style={{ width: 80, height: 80, border: '1px solid #ccc', borderRadius: 6, overflow: 'hidden' }}>
+            {lic.preview ? (
+              <div style={{ width: 60, height: 60, border: '1px solid #ccc', borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
                 <img src={lic.preview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
+            ) : (
+              <div style={{ width: 60, height: 60 }} />
             )}
-            {licenses.length > 1 && (
-              <button type="button" className="btn secondary small" onClick={() => removeLicense(lic.id)} style={{ alignSelf: 'center' }}>Remove</button>
+            {licenses.length > 1 ? (
+              <button type="button" className="btn secondary small" onClick={() => removeLicense(lic.id)} style={{ height: 36, whiteSpace: 'nowrap' }}>Remove</button>
+            ) : (
+              <div style={{ width: 70 }} />
             )}
           </div>
         ))}
@@ -244,22 +248,26 @@ export default function PharmacyVerificationForm() {
           Upload any additional certificates like Pharmacist registration, GST certificate, or shop establishment certificate.
         </p>
         {certificates.map((cert, idx) => (
-          <div key={cert.id} className="doc-row" style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap' }}>
-            <label className="field" style={{ flex: '1 1 180px' }}>
+          <div key={cert.id} className="doc-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto auto', gap: '1rem', alignItems: 'end', marginBottom: '1rem' }}>
+            <label className="field">
               <span>Certificate Name</span>
-              <input type="text" value={cert.name} onChange={e => updateCertificate(cert.id, 'name', e.target.value)} placeholder="Pharmacist Cert, GST Cert, etc." />
+              <input type="text" value={cert.name} onChange={e => updateCertificate(cert.id, 'name', e.target.value)} placeholder="Pharmacist Cert, GST Cert, etc." style={{ width: '100%', padding: '0.5rem 0.75rem', border: '1px solid #ccc', borderRadius: 6 }} />
             </label>
-            <label className="field" style={{ flex: '1 1 200px' }}>
+            <label className="field">
               <span>Upload Document</span>
-              <input type="file" accept="image/*,.pdf" onChange={e => handleCertificateFile(cert.id, e.target.files?.[0])} />
+              <input type="file" accept="image/*,.pdf" onChange={e => handleCertificateFile(cert.id, e.target.files?.[0])} style={{ width: '100%' }} />
             </label>
-            {cert.preview && (
-              <div style={{ width: 80, height: 80, border: '1px solid #ccc', borderRadius: 6, overflow: 'hidden' }}>
+            {cert.preview ? (
+              <div style={{ width: 60, height: 60, border: '1px solid #ccc', borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
                 <img src={cert.preview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
+            ) : (
+              <div style={{ width: 60, height: 60 }} />
             )}
-            {certificates.length > 1 && (
-              <button type="button" className="btn secondary small" onClick={() => removeCertificate(cert.id)} style={{ alignSelf: 'center' }}>Remove</button>
+            {certificates.length > 1 ? (
+              <button type="button" className="btn secondary small" onClick={() => removeCertificate(cert.id)} style={{ height: 36, whiteSpace: 'nowrap' }}>Remove</button>
+            ) : (
+              <div style={{ width: 70 }} />
             )}
           </div>
         ))}
