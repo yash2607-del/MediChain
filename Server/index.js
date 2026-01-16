@@ -13,6 +13,7 @@ import authRouter from "./routers/authRouter.js";
 import appointmentRouter from "./routers/appointmentRouter.js"; 
 import placesRouter from "./routers/locationRouter.js"; 
 import scanRouter from "./routers/scanRouter.js";
+import doctorRouter from "./routers/doctorRouter.js";
 
 // Initialize app
 const app = express();
@@ -40,6 +41,9 @@ app.use("/api/auth", authRouter);
 app.use("/api/places", placesRouter);
 app.use("/api/appointments", appointmentRouter);
 app.use("/api/scan", scanRouter);
+app.use("/api/doctor", doctorRouter);
+// Serve uploaded files statically
+app.use("/uploads", express.static("uploads"));
 // Root endpoint
 app.get("/", (req, res) => {
   res.send(" MediChain backend running successfully!");

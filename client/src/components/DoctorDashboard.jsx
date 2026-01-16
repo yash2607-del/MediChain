@@ -4,6 +4,7 @@ import '../styles/doctor-dashboard.scss';
 import PrescribeForm from './doctor/PrescribeForm.jsx';
 import CalendarPane from './doctor/CalendarPane.jsx';
 import AppointmentsPane from './doctor/AppointmentsPane.jsx';
+import VerificationForm from './doctor/VerificationForm.jsx';
 
 export default function DoctorDashboard() {
   // Helper to build API URLs from env
@@ -144,7 +145,8 @@ export default function DoctorDashboard() {
   const menuItems = [
     { key: 'prescribe', label: 'Prescribe' },
     { key: 'calendar', label: 'Calendar' },
-    { key: 'appointments', label: 'Appointments' }
+    { key: 'appointments', label: 'Appointments' },
+    { key: 'verification', label: 'Verification' }
   ];
 
   return (
@@ -182,6 +184,11 @@ export default function DoctorDashboard() {
             loadMsg={loadMsg}
             onRefresh={refreshAppointments}
           />
+        )}
+        {active === 'verification' && (
+          <section className="verification-pane">
+            <VerificationForm />
+          </section>
         )}
       </DashboardLayout>
     </div>
