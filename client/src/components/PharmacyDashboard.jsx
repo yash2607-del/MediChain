@@ -5,8 +5,9 @@ import Billing from '../pages/Billing/Billing.jsx';
 // Removed QR scanner; using manual add form instead
 import AddMedicineForm from '../pages/Inventory/AddMedicineForm.jsx';
 import Inventory from '../pages/Inventory/Inventory.jsx';
-import { FaCashRegister, FaBarcode, FaBoxes, FaHistory } from 'react-icons/fa';
+import { FaCashRegister, FaBarcode, FaBoxes, FaHistory, FaShieldAlt } from 'react-icons/fa';
 import PatientHistory from '../pages/Pharmacy/PatientHistory.jsx';
+import PharmacyVerificationForm from './pharmacy/PharmacyVerificationForm.jsx';
 
 // Simple initial demo inventory
 const initialInventory = [];
@@ -43,9 +44,10 @@ export default function PharmacyDashboard() {
 
   const menuItems = [
     { key: 'billing', label: 'Billing', icon: <FaCashRegister /> },
-  { key: 'scan', label: 'Add Medicine', icon: <FaBarcode /> },
+    { key: 'scan', label: 'Add Medicine', icon: <FaBarcode /> },
     { key: 'inventory', label: 'Inventory', icon: <FaBoxes /> },
     { key: 'history', label: 'Patient History', icon: <FaHistory /> },
+    { key: 'verification', label: 'Verification', icon: <FaShieldAlt /> },
   ];
 
   return (
@@ -76,6 +78,11 @@ export default function PharmacyDashboard() {
         {active === 'history' && (
           <section className="history-pane">
             <PatientHistory />
+          </section>
+        )}
+        {active === 'verification' && (
+          <section className="verification-pane">
+            <PharmacyVerificationForm />
           </section>
         )}
       </DashboardLayout>
