@@ -18,7 +18,6 @@ pnpm-debug.log*
 # Keep examples (eg. .env.example) tracked
 **/.env
 **/.env.*
-!**/.env.example
 
 ## Certificates / keys
 *.pem

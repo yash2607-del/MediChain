@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaPhoneAlt, FaTimes } from 'react-icons/fa';
+import ChatbotWidget from '../../components/chatbot/ChatbotWidget';
 import './PatientAppointments.css';
 
 export default function PatientAppointments() {
@@ -264,6 +265,7 @@ export default function PatientAppointments() {
       </div>
       </>
       )}
+      <ChatbotWidget/>
     </div>
   );
 }
