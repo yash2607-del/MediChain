@@ -6,9 +6,202 @@
   <title>MediChain</title>
   <!-- Favicon will be replaced at runtime by main.jsx if hashed asset path changes -->
   <link rel="icon" type="image/png" href="/src/assets/medichain-logo.png" />
+  <style>
+    /* Google Translate Widget Styling */
+    /* Container for the custom translate control */
+    #google_translate_element {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      padding: 0;
+    }
+
+    /* Styled select that replaces the default Google UI */
+    #custom-translate-select {
+      -webkit-appearance: none;
+      appearance: none;
+      padding: 8px 36px 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.08);
+      font-size: 14px;
+      font-weight: 600;
+      color: #6b6868;
+      background: linear-gradient(135deg, rgba(66,133,244,0.96) 0%, rgba(52,168,83,0.96) 100%);
+      box-shadow: 0 6px 18px rgba(66,133,244,0.24);
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    #custom-translate-select:focus {
+      outline: none;
+      box-shadow: 0 6px 20px rgba(66,133,244,0.32);
+    }
+
+    #custom-translate-select option {
+      color: #333;
+      background: #fff;
+      font-weight: 500;
+    }
+
+    /* Hide Google Translate branding but keep dropdown visible */
+    /* Hide Google default gadget (we use our own control) */
+    .goog-te-gadget {
+      display: none !important;
+    }
+    
+    .goog-te-gadget > span > a {
+      display: none !important;
+    }
+    
+    .goog-te-gadget > span > span {
+      display: none !important;
+    }
+    
+    .goog-te-gadget .goog-te-combo {
+      display: none !important;
+    }
+
+    /* Style the dropdown */
+    .goog-te-combo {
+      padding: 8px 36px 8px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+    
+    .goog-te-combo:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .goog-te-combo:focus {
+      background: rgba(255, 255, 255, 0.35);
+    }
+    
+    /* Style dropdown options */
+    .goog-te-combo option {
+      background: white;
+      color: #333;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+      font-size: 14px;
+      padding: 8px 12px;
+      font-weight: 500;
+    }
+
+    /* Force body to stay at top (Google's script tries to push it down) */
+    body {
+      top: 0 !important;
+      position: static !important;
+    }
+
+    /* Hide Google's top banner frame completely */
+    .goog-te-banner-frame.skiptranslate {
+      display: none !important;
+    }
+    
+    body > .skiptranslate:first-child {
+      display: none !important;
+    }
+
+    /* Hide Google tooltip/balloon */
+    #goog-gt-tt,
+    .goog-te-balloon-frame {
+      display: none !important;
+    }
+    
+    /* Prevent Google from adding top padding */
+    body.translated-ltr {
+      margin-top: 0 !important;
+    }
+  </style>
   </head>
   <body>
+    <div id="google_translate_element">
+      <select id="custom-translate-select" class="notranslate" translate="no" aria-label="Select language" onchange="setGTranslate(this.value)">
+        <option value="en" translate="no">English</option>
+        <option value="hi" translate="no">Hindi</option>
+        <option value="mr" translate="no">Marathi</option>
+        <option value="es" translate="no">Spanish</option>
+        <option value="fr" translate="no">French</option>
+        <option value="de" translate="no">German</option>
+        <option value="ja" translate="no">Japanese</option>
+        <option value="zh-CN" translate="no">Chinese (Simplified)</option>
+        <option value="ar" translate="no">Arabic</option>
+        <option value="pt" translate="no">Portuguese (Brazil)</option>
+        <option value="ru" translate="no">Russian</option>
+        <option value="it" translate="no">Italian</option>
+        <option value="" translate="no">Original</option>
+      </select>
+    </div>
     <div id="root"></div>
+
+    <script>
+      // Helper to read cookies
+      function _readCookie(name) {
+        var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? decodeURIComponent(match[2]) : null;
+      }
+
+      // Sets the googtrans cookie to request Google Translate to apply a language
+      function setGTranslate(lang) {
+        // lang empty or 'en' means reset to original
+        if (!lang || lang === 'en') {
+          document.cookie = 'googtrans=;path=/';
+          try { document.cookie = 'googtrans=;path=/;domain=.' + location.hostname; } catch(e){}
+          location.reload();
+          return;
+        }
+        var cookieVal = '/en/' + lang;
+        document.cookie = 'googtrans=' + cookieVal + ';path=/';
+        try { document.cookie = 'googtrans=' + cookieVal + ';path=/;domain=.' + location.hostname; } catch(e){}
+        // reload so Google Translate script applies the cookie
+        location.reload();
+      }
+
+      // On load: set select to current translation cookie if present
+      (function(){
+        var val = _readCookie('googtrans');
+        if (val) {
+          var parts = val.split('/');
+          var lang = parts.length >= 3 ? parts[2] : '';
+          var sel = document.getElementById('custom-translate-select');
+          if (sel && lang) sel.value = lang;
+        }
+      })();
+
+      function googleTranslateElementInit() {
+        if (!window.google || !window.google.translate) return;
+        new window.google.translate.TranslateElement(
+          {
+            pageLanguage: 'en',
+            includedLanguages: 'en,hi,mr,es,fr,de,ja,zh-CN,ar,pt,ru,it',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false,
+            multilanguagePage: true
+          },
+          'google_translate_element'
+        );
+      }
+    </script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
