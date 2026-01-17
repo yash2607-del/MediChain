@@ -72,7 +72,7 @@ export default function App() {
             <Route path="/appointment-form" element={<AppointmentForm />} />
             <Route path="/prescription-table" element={<PrescriptionTable />} />
             <Route path="/patient-appointments" element={<PatientAppointments />} />
-l            <Route path="/logout" element={<Logout />} />
+            <Route path="/logout" element={<Logout />} />
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>

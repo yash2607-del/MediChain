@@ -52,7 +52,10 @@ export default function LanguageWidget() {
   }
 
   return (
-    <div id="google_translate_element">
+    <div
+      id="google_translate_element"
+      className={isLanding ? 'gte-landing' : 'gte-inner'}
+    >
       {isLanding && (
         <div className="top-auth-buttons">
           <button className="top-auth-btn login" type="button" onClick={handleLoginClick}>

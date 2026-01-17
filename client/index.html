@@ -10,15 +10,26 @@
     /* Google Translate Widget Styling */
     /* Container for the custom translate control */
     #google_translate_element {
-      position: fixed;
-      top: 16px;
-      right: 16px;
       z-index: 9999;
       display: flex;
       align-items: center;
       gap: 12px;
       background: transparent;
       padding: 0;
+    }
+
+    /* Landing page: keep language widget at top-right */
+    #google_translate_element.gte-landing {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+    }
+
+    /* Inner pages: show language widget just below top nav bar */
+    #google_translate_element.gte-inner {
+      position: fixed;
+      top: 72px; /* adjust if nav height changes */
+      right: 16px;
     }
 
     /* Auth buttons next to language switcher */
