@@ -136,7 +136,7 @@ export default function InventoryModern({ inventory = [], addMedicine, compact =
                   )}
                   <div className="detail-row">
                     <span className="label">Price:</span>
-                    <span style={{ fontWeight: 700, color: '#667eea' }}>₹{it.price || 0}</span>
+                    <span style={{ fontWeight: 700, color: '#00A9FF' }}>₹{it.price || 0}</span>
                   </div>
                   <div className="detail-row">
                     <span className="label">Quantity:</span>

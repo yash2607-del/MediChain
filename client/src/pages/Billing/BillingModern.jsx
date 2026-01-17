@@ -366,13 +366,14 @@ export default function BillingModern({ inventory = [], updateStock = () => {}, 
       </div>
 
       {/* Quick Add */}
-      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+      <div className="quick-add-row" style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         <input
           value={idInput}
           onChange={(e) => setIdInput(e.target.value)}
           placeholder="Enter Medicine ID"
           style={{ 
             flex: 1,
+            minWidth: '200px',
             padding: '0.75rem 1rem',
             border: '2px solid #e2e8f0',
             borderRadius: '0.75rem'
@@ -381,36 +382,14 @@ export default function BillingModern({ inventory = [], updateStock = () => {}, 
         />
         <button 
           onClick={addById}
-          style={{
-            padding: '0.75rem 1.5rem',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.75rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
+          className="btn-blue"
         >
           <FaPlus /> Add by ID
         </button>
         {!scanning && (
           <button 
             onClick={startScanner}
-            style={{
-              padding: '0.75rem 1.5rem',
-              background: 'white',
-              color: '#667eea',
-              border: '2px solid #667eea',
-              borderRadius: '0.75rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
+            className="btn-blue-outline"
           >
             <FaCamera /> Scan QR
           </button>
@@ -418,15 +397,8 @@ export default function BillingModern({ inventory = [], updateStock = () => {}, 
         {scanning && (
           <button 
             onClick={stopScanner}
-            style={{
-              padding: '0.75rem 1.5rem',
-              background: '#dc2626',
-              color: 'white',
-              border: 'none',
-              borderRadius: '0.75rem',
-              fontWeight: 700,
-              cursor: 'pointer'
-            }}
+            className="btn-blue"
+            style={{ background: '#dc2626' }}
           >
             Stop Scan
           </button>
@@ -434,18 +406,8 @@ export default function BillingModern({ inventory = [], updateStock = () => {}, 
       </div>
 
       {scanning && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <div
-            id="billing-qr-scanner"
-            style={{ 
-              width: '100%', 
-              maxWidth: '400px', 
-              height: '300px', 
-              border: '2px solid #667eea', 
-              borderRadius: '0.75rem',
-              overflow: 'hidden'
-            }}
-          />
+        <div className="qr-scanner-container">
+          <div id="billing-qr-scanner" />
         </div>
       )}
 

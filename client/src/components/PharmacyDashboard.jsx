@@ -164,15 +164,7 @@ export default function PharmacyDashboard() {
                 <div style={{ textAlign: 'center', marginTop: '1rem' }}>
                   <button
                     onClick={() => setActive('inventory')}
-                    style={{
-                      padding: '0.75rem 2rem',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      fontWeight: 700,
-                      cursor: 'pointer'
-                    }}
+                    className="btn-blue"
                   >
                     View All {inventory.length} Items
                   </button>
@@ -185,24 +177,24 @@ export default function PharmacyDashboard() {
                 <h2><FaHistory className="icon" /> Recent Bills</h2>
               </div>
               <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table className="responsive-table">
                   <thead>
-                    <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #e2e8f0' }}>
-                      <th style={{ padding: '1rem', textAlign: 'left' }}>Bill No</th>
-                      <th style={{ padding: '1rem', textAlign: 'left' }}>Date</th>
-                      <th style={{ padding: '1rem', textAlign: 'left' }}>Items</th>
-                      <th style={{ padding: '1rem', textAlign: 'right' }}>Total</th>
+                    <tr>
+                      <th>Bill No</th>
+                      <th>Date</th>
+                      <th>Items</th>
+                      <th style={{ textAlign: 'right' }}>Total</th>
                     </tr>
                   </thead>
                   <tbody>
                     {bills.slice(0, 5).map(bill => (
-                      <tr key={bill._id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '1rem' }}>{bill._id?.slice(-8) || 'N/A'}</td>
-                        <td style={{ padding: '1rem' }}>
+                      <tr key={bill._id}>
+                        <td>{bill._id?.slice(-8) || 'N/A'}</td>
+                        <td>
                           {new Date(bill.createdAt).toLocaleDateString()}
                         </td>
-                        <td style={{ padding: '1rem' }}>{bill.items?.length || 0} items</td>
-                        <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700 }}>
+                        <td>{bill.items?.length || 0} items</td>
+                        <td style={{ textAlign: 'right', fontWeight: 700 }}>
                           ₹{bill.total?.toFixed(2)}
                         </td>
                       </tr>
