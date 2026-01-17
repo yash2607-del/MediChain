@@ -147,12 +147,6 @@
       transform: translateY(0);
     }
 
-    #custom-translate-select:focus {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
-    }
-
     #custom-translate-select:hover {
       border-color: #00A9FF;
       box-shadow: 0 10px 30px rgba(0, 169, 255, 0.25);
@@ -265,34 +259,7 @@
   </style>
   </head>
   <body>
-    <div id="google_translate_element">
-      <div class="top-auth-buttons">
-        <a href="#/auth/patient" class="top-auth-btn login">Login</a>
-        <a href="#/auth/patient" class="top-auth-btn signup">Sign Up</a>
-      </div>
-      <button id="language-icon-btn" aria-label="Select language" onclick="toggleLanguageDropdown()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
-        </svg>
-      </button>
-      <select id="custom-translate-select" class="notranslate" translate="no" aria-label="Select language" onchange="setGTranslate(this.value)" onblur="hideLanguageDropdown()">
-        <option value="en" translate="no">English</option>
-        <option value="hi" translate="no">हिन्दी (Hindi)</option>
-        <option value="bn" translate="no">বাংলা (Bengali)</option>
-        <option value="te" translate="no">తెలుగు (Telugu)</option>
-        <option value="mr" translate="no">मराठी (Marathi)</option>
-        <option value="ta" translate="no">தமிழ் (Tamil)</option>
-        <option value="gu" translate="no">ગુજરાતી (Gujarati)</option>
-        <option value="kn" translate="no">ಕನ್ನಡ (Kannada)</option>
-        <option value="ml" translate="no">മലയാളം (Malayalam)</option>
-        <option value="pa" translate="no">ਪੰਜਾਬੀ (Punjabi)</option>
-        <option value="bho" translate="no">भोजपुरी (Bhojpuri)</option>
-        <option value="as" translate="no">অসমীয়া (Assamese)</option>
-        <option value="mni-Mtei" translate="no">মৈতৈলোন্ (Manipuri)</option>
-        <option value="lus" translate="no">Mizo (Mizo)</option>
-        <option value="grt" translate="no">Garo (Garo)</option>
-      </select>
-    </div>
+    <!-- React will render the language widget (and top auth buttons on landing) -->
     <div id="root"></div>
 
     <script>
@@ -358,16 +325,24 @@
 
       function googleTranslateElementInit() {
         if (!window.google || !window.google.translate) return;
-        new window.google.translate.TranslateElement(
-          {
-            pageLanguage: 'en',
-            includedLanguages: 'en,hi,bn,te,mr,ta,gu,kn,ml,pa,bho,as,mni-Mtei,lus,grt',
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-            autoDisplay: false,
-            multilanguagePage: true
-          },
-          'google_translate_element'
-        );
+        var tryInit = function() {
+          var el = document.getElementById('google_translate_element');
+          if (!el) {
+            setTimeout(tryInit, 200);
+            return;
+          }
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: 'en',
+              includedLanguages: 'en,hi,bn,te,mr,ta,gu,kn,ml,pa,bho,as,mni-Mtei,lus,grt',
+              layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+              autoDisplay: false,
+              multilanguagePage: true
+            },
+            'google_translate_element'
+          );
+        };
+        tryInit();
       }
     </script>
     <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>

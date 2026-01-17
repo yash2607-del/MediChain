@@ -19,10 +19,12 @@ import AppointmentForm from './pages/Patient/Appointment-form.jsx'
 import PrescriptionTable from './pages/Patient/Prescription-table.jsx'
 import PatientAppointments from './pages/Patient/PatientAppointments.jsx'
 import Logout from './components/Logout.jsx'
+import LanguageWidget from './components/LanguageWidget.jsx'
 export default function App() {
   return (
     <BrowserRouter>
       <div className="app">
+        <LanguageWidget />
         <main>
           <Routes>
             {/* Home and public pages */}
