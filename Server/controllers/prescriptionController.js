@@ -361,11 +361,21 @@ export async function findPharmaciesForPrescription(req, res) {
     for (const pharmacy of allPharmacyUsers) {
       const pharmacyId = pharmacy._id.toString();
       const profile = pharmacy.profile || {};
+      const profilePharmacyId = profile.pharmacyId; // Some inventories use profile.pharmacyId instead of _id
       
-      // Find inventory for this pharmacy using its _id
-      const inventory = await Inventory.find({ 
+      // Find inventory for this pharmacy - check both _id and profile.pharmacyId
+      // This matches how searchInventory works
+      let inventory = await Inventory.find({ 
         pharmacyId: pharmacyId 
       }).lean();
+      
+      // Also check if inventory uses profile.pharmacyId
+      if (profilePharmacyId) {
+        const inventoryByProfileId = await Inventory.find({
+          pharmacyId: profilePharmacyId
+        }).lean();
+        inventory = [...inventory, ...inventoryByProfileId];
+      }
 
       // Get available medicine names in this pharmacy (lowercase for matching)
       const availableMeds = inventory

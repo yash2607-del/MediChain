@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { FaCheckCircle, FaExclamationTriangle, FaLock, FaKey, FaTimes } from 'react-icons/fa';
 
 export default function PatientHistory() {
   const [email, setEmail] = useState('');
