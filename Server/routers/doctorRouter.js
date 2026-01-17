@@ -72,11 +72,15 @@ const uploadFields = upload.fields([
 router.post('/verification', uploadFields, async (req, res) => {
   try {
     const {
-      fullName,
+      firstName,
+      middleName,
+      lastName,
       phone,
       email,
       registrationNumber,
       yearsOfPractice,
+      specialisation,
+      imaVerified,
       degreesMeta,
       certificatesMeta
     } = req.body;
@@ -113,11 +117,16 @@ router.post('/verification', uploadFields, async (req, res) => {
 
     // Build verification record
     const verificationData = {
-      fullName,
+      firstName,
+      middleName: middleName || '',
+      lastName,
+      fullName: [firstName, middleName, lastName].filter(Boolean).join(' '),
       phone,
       email,
       registrationNumber,
+      specialisation: specialisation || '',
       yearsOfPractice: yearsOfPractice ? parseInt(yearsOfPractice, 10) : null,
+      imaVerified: imaVerified === 'true',
       degrees,
       certificates,
       status: 'pending', // pending | approved | rejected
@@ -139,6 +148,85 @@ router.post('/verification', uploadFields, async (req, res) => {
   } catch (err) {
     console.error('Verification error:', err);
     res.status(500).json({ error: err.message || 'Server error' });
+  }
+});
+
+// GET /api/doctor/verify-ima - Verify doctor name with IMA India database
+router.get('/verify-ima', async (req, res) => {
+  try {
+    const { firstName, lastName } = req.query;
+    
+    const firstNameTrimmed = firstName?.trim()?.toUpperCase() || '';
+    const lastNameTrimmed = lastName?.trim()?.toUpperCase() || '';
+    
+    if (!firstNameTrimmed && !lastNameTrimmed) {
+      return res.status(400).json({ error: 'First name or last name is required', found: false });
+    }
+
+    const timestamp = Date.now();
+    
+    // Helper function to build IMA API URL
+    const buildImaUrl = (searchTerm) => {
+      return `https://www.ima-india.org/demomembership/ima-member-sys-encr/server_processing.php?draw=5&columns%5B0%5D%5Bdata%5D=0&columns%5B0%5D%5Bname%5D=&columns%5B0%5D%5Bsearchable%5D=true&columns%5B0%5D%5Borderable%5D=true&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B1%5D%5Bdata%5D=1&columns%5B1%5D%5Bname%5D=&columns%5B1%5D%5Bsearchable%5D=true&columns%5B1%5D%5Borderable%5D=true&columns%5B1%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B1%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B2%5D%5Bdata%5D=2&columns%5B2%5D%5Bname%5D=&columns%5B2%5D%5Bsearchable%5D=true&columns%5B2%5D%5Borderable%5D=true&columns%5B2%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B2%5D%5Bsearch%5D%5Bregex%5D=false&columns%5B3%5D%5Bdata%5D=3&columns%5B3%5D%5Bname%5D=&columns%5B3%5D%5Bsearchable%5D=true&columns%5B3%5D%5Borderable%5D=true&columns%5B3%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B3%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=0&order%5B0%5D%5Bdir%5D=asc&start=0&length=100&search%5Bvalue%5D=${encodeURIComponent(searchTerm)}&search%5Bregex%5D=false&_=${timestamp}`;
+    };
+
+    const fetchOptions = {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'MediChain/1.0'
+      }
+    };
+
+    // Search by lastName (more unique usually)
+    // IMA data format: [State, Branch, FirstName, LastName]
+    const searchTerm = lastNameTrimmed || firstNameTrimmed;
+    const response = await fetch(buildImaUrl(searchTerm), fetchOptions);
+
+    if (!response.ok) {
+      throw new Error('IMA API request failed');
+    }
+
+    const data = await response.json();
+    const records = data.data || [];
+    
+    // Check if any record matches BOTH firstName AND lastName
+    // IMA record format: [State, Branch, FirstName, LastName]
+    let matchedRecord = null;
+    let found = false;
+    
+    if (firstNameTrimmed && lastNameTrimmed) {
+      // Both names provided - look for exact match of both
+      matchedRecord = records.find(record => {
+        const recordFirstName = (record[2] || '').toUpperCase().trim();
+        const recordLastName = (record[3] || '').toUpperCase().trim();
+        return recordFirstName === firstNameTrimmed && recordLastName === lastNameTrimmed;
+      });
+      found = !!matchedRecord;
+    } else {
+      // Only one name provided - just check if any record matches
+      found = records.length > 0;
+      matchedRecord = records[0];
+    }
+
+    res.json({
+      found,
+      recordsTotal: data.recordsFiltered || 0,
+      matchedRecord: matchedRecord ? {
+        state: matchedRecord[0],
+        branch: matchedRecord[1],
+        firstName: matchedRecord[2],
+        lastName: matchedRecord[3]
+      } : null,
+      records: records.slice(0, 5).map(r => ({
+        state: r[0],
+        branch: r[1],
+        firstName: r[2],
+        lastName: r[3]
+      }))
+    });
+  } catch (err) {
+    console.error('IMA verification error:', err);
+    res.status(500).json({ error: 'Failed to verify with IMA', found: false });
   }
 });
 
