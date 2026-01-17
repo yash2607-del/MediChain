@@ -93,6 +93,8 @@ export default function PrescriptionTable() {
   const handleDownload = async (prescription) => {
     try {
       let prescriptionData = prescription;
+      let verified = prescription.verified === true;
+      let storedHash = prescription.storedHash || null;
       
       // If we don't have full details, fetch them
       if (!prescription.medicines && !prescription.doc) {
@@ -104,9 +106,13 @@ export default function PrescriptionTable() {
         try { data = text ? JSON.parse(text) : {}; } catch { data = {}; }
         if (res.ok) {
           prescriptionData = data.doc || prescription;
+          if (typeof data.verified === 'boolean') verified = data.verified;
+          if (data.storedHash) storedHash = data.storedHash;
         }
       } else if (prescription.doc) {
         prescriptionData = prescription.doc;
+        if (typeof prescription.verified === 'boolean') verified = prescription.verified;
+        if (prescription.storedHash) storedHash = prescription.storedHash;
       }
 
       // Create PDF
@@ -223,15 +229,15 @@ export default function PrescriptionTable() {
       yPos += 7;
       
       doc.setFont(undefined, 'normal');
-      const verificationText = prescription.verified 
+      const verificationText = verified
         ? 'This prescription has been verified and is authentic.' 
         : 'Verification status: Pending or Tampered';
       doc.text(verificationText, 20, yPos);
       
-      if (prescription.storedHash) {
+      if (storedHash) {
         yPos += 7;
         doc.setFontSize(8);
-        doc.text(`Hash: ${prescription.storedHash.substring(0, 50)}...`, 20, yPos);
+        doc.text(`Hash: ${storedHash.substring(0, 50)}...`, 20, yPos);
       }
       
       // Footer
