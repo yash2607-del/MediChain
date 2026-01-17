@@ -27,8 +27,10 @@ export default function Inventory({ inventory = [], addMedicine }) {
       try {
         setLoading(true);
         setError('');
-        const base = import.meta.env.VITE_API_BASE_URL || '/';
-        const url = new URL(`api/inventory?pharmacyId=${encodeURIComponent(pharmacyId)}`, base).toString();
+        const base = import.meta.env?.VITE_API_BASE_URL;
+        const url = base
+          ? new URL(`api/inventory?pharmacyId=${encodeURIComponent(pharmacyId)}`, base.endsWith('/') ? base : `${base}/`).toString()
+          : `/api/inventory?pharmacyId=${encodeURIComponent(pharmacyId)}`;
         const res = await fetch(url);
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || 'Failed to load inventory');
