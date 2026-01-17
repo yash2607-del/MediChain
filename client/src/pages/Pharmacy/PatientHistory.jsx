@@ -12,6 +12,14 @@ export default function PatientHistory() {
   const [detailError, setDetailError] = useState(null);
   const [selected, setSelected] = useState(null);
 
+  // OTP verification state
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpInput, setOtpInput] = useState('');
+  const [otpError, setOtpError] = useState(null);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [pendingPrescriptionId, setPendingPrescriptionId] = useState(null);
+  const [verifiedPrescriptions, setVerifiedPrescriptions] = useState(new Set());
+
   async function fetchHistory() {
     setHistoryError(null);
     setItems([]);
@@ -38,7 +46,29 @@ export default function PatientHistory() {
     }
   }
 
-  async function viewDetails(id) {
+  async function viewDetails(id, skipOtpCheck = false) {
+    // Check if prescription is locked and needs OTP (unless already verified)
+    if (!skipOtpCheck && !verifiedPrescriptions.has(id)) {
+      // First check the status
+      try {
+        const base = import.meta.env.VITE_API_BASE_URL || '/';
+        const statusUrl = new URL(`api/prescriptions/${encodeURIComponent(id)}/status`, base).toString();
+        const statusRes = await fetch(statusUrl, { method: 'GET' });
+        const statusData = await statusRes.json();
+        
+        if (statusData.isLocked || (!statusData.otpVerifiedBy)) {
+          // Prescription needs OTP verification
+          setPendingPrescriptionId(id);
+          setOtpInput('');
+          setOtpError(null);
+          setShowOtpModal(true);
+          return;
+        }
+      } catch (err) {
+        console.warn('Status check failed, proceeding anyway:', err);
+      }
+    }
+
     setDetailError(null);
     setDetailLoading(true);
     setShowDetail(true);
@@ -69,6 +99,51 @@ export default function PatientHistory() {
     } finally {
       setDetailLoading(false);
     }
+  }
+
+  // Verify OTP and then view details
+  async function handleOtpSubmit() {
+    if (!otpInput || otpInput.length !== 4) {
+      setOtpError('Please enter a valid 4-digit OTP');
+      return;
+    }
+
+    setOtpVerifying(true);
+    setOtpError(null);
+
+    try {
+      const base = import.meta.env.VITE_API_BASE_URL || '/';
+      const url = new URL(`api/prescriptions/${encodeURIComponent(pendingPrescriptionId)}/verify-otp`, base).toString();
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp: otpInput })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'OTP verification failed');
+      }
+
+      // OTP verified successfully
+      setVerifiedPrescriptions(prev => new Set([...prev, pendingPrescriptionId]));
+      setShowOtpModal(false);
+      setOtpInput('');
+      
+      // Now view the details
+      viewDetails(pendingPrescriptionId, true);
+    } catch (err) {
+      setOtpError(err.message || 'Failed to verify OTP');
+    } finally {
+      setOtpVerifying(false);
+    }
+  }
+
+  function closeOtpModal() {
+    setShowOtpModal(false);
+    setOtpInput('');
+    setOtpError(null);
+    setPendingPrescriptionId(null);
   }
 
   return (
@@ -171,14 +246,21 @@ export default function PatientHistory() {
                     <td style={{ padding: '0.75rem', fontSize: '0.875rem' }}>
                       {p.notes ? (p.notes.length > 60 ? p.notes.slice(0, 57) + '...' : p.notes) : '—'}
                     </td>
-                    <td style={{ padding: '0.75rem' }}>
+                    <td style={{ padding: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {(p.isLocked !== false && !verifiedPrescriptions.has(p._id)) && (
+                        <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <FaLock size={12} />
+                        </span>
+                      )}
                       <button 
                         type="button" 
                         className="add-btn" 
                         onClick={() => viewDetails(p._id)}
                         style={{ padding: '0.4rem 0.6rem', fontSize: '0.875rem' }}
                       >
-                        View
+                        {(p.isLocked !== false && !verifiedPrescriptions.has(p._id)) ? (
+                          <><FaKey size={12} /> Unlock</>
+                        ) : 'View'}
                       </button>
                     </td>
                   </tr>
@@ -200,6 +282,110 @@ export default function PatientHistory() {
           </div>
         </div>
       </div>
+
+      {/* OTP Verification Modal */}
+      {showOtpModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{ 
+            position: 'fixed', 
+            inset: 0, 
+            background: 'rgba(0,0,0,0.5)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            zIndex: 1000 
+          }}
+          onClick={closeOtpModal}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ 
+              background: '#fff', 
+              borderRadius: '12px', 
+              padding: '1.5rem', 
+              maxWidth: '400px', 
+              width: '90%',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <FaLock color="#ef4444" /> Prescription Locked
+              </h3>
+              <button 
+                onClick={closeOtpModal}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem' }}
+              >
+                <FaTimes color="#666" />
+              </button>
+            </div>
+            
+            <p style={{ color: '#666', marginBottom: '1rem', fontSize: '0.9rem' }}>
+              This prescription is private. Enter the <strong>4-digit OTP</strong> provided by the patient to view it.
+            </p>
+
+            <div className="field" style={{ marginBottom: '1rem' }}>
+              <label>Enter OTP</label>
+              <input
+                type="text"
+                maxLength={4}
+                placeholder="0000"
+                value={otpInput}
+                onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                style={{ 
+                  textAlign: 'center', 
+                  fontSize: '2rem', 
+                  letterSpacing: '1rem',
+                  fontWeight: 'bold',
+                  fontFamily: 'monospace'
+                }}
+              />
+            </div>
+
+            {otpError && (
+              <div style={{ 
+                background: '#fde8e8', 
+                color: '#9b1c1c', 
+                padding: '0.6rem 0.75rem', 
+                borderRadius: '8px', 
+                marginBottom: '1rem',
+                fontSize: '0.85rem'
+              }}>
+                {otpError}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button 
+                type="button"
+                className="add-btn"
+                onClick={handleOtpSubmit}
+                disabled={otpVerifying || otpInput.length !== 4}
+                style={{ flex: 1 }}
+              >
+                {otpVerifying ? 'Verifying...' : 'Verify & View'}
+              </button>
+              <button 
+                type="button"
+                onClick={closeOtpModal}
+                style={{ 
+                  flex: 1, 
+                  background: '#e5e7eb', 
+                  color: '#374151',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  padding: '0.6rem'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Detail Modal */}
       {showDetail && (

@@ -3,21 +3,74 @@ import { FaCheckCircle } from 'react-icons/fa';
 
 export default function VerificationForm() {
   const [formData, setFormData] = useState({
-    fullName: '',
+    firstName: '',
+    middleName: '',
+    lastName: '',
     phone: '',
     email: '',
     registrationNumber: '',
-    yearsOfPractice: ''
+    yearsOfPractice: '',
+    specialisation: ''
   });
   const [degrees, setDegrees] = useState([{ id: crypto.randomUUID(), name: '', file: null, preview: null }]);
   const [certificates, setCertificates] = useState([{ id: crypto.randomUUID(), name: '', file: null, preview: null }]);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null);
+  
+  // IMA Verification state
+  const [imaVerifying, setImaVerifying] = useState(false);
+  const [imaVerified, setImaVerified] = useState(null); // null = not checked, true = found, false = not found
+  const [imaResult, setImaResult] = useState(null);
 
   function handleChange(e) {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Reset IMA verification when name changes
+    if (name === 'firstName' || name === 'lastName') {
+      setImaVerified(null);
+      setImaResult(null);
+    }
+  }
+
+  // IMA API verification lookup
+  async function verifyWithIMA() {
+    const firstName = formData.firstName.trim();
+    const lastName = formData.lastName.trim();
+    
+    if (!firstName && !lastName) {
+      setError('Please enter your first name or last name to verify');
+      return;
+    }
+    
+    setImaVerifying(true);
+    setImaVerified(null);
+    setImaResult(null);
+    setError(null);
+    
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const params = new URLSearchParams();
+      if (firstName) params.append('firstName', firstName);
+      if (lastName) params.append('lastName', lastName);
+      
+      const res = await fetch(`${baseUrl}/api/doctor/verify-ima?${params.toString()}`);
+      const data = await res.json();
+      
+      if (data.found && data.matchedRecord) {
+        setImaVerified(true);
+        setImaResult(data.matchedRecord); // Now contains { state, branch, firstName, lastName }
+      } else {
+        setImaVerified(false);
+        setImaResult(null);
+      }
+    } catch (err) {
+      console.error('IMA verification error:', err);
+      setImaVerified(false);
+      setError('Could not verify with IMA. Please try again.');
+    } finally {
+      setImaVerifying(false);
+    }
   }
 
   // Degree handlers
@@ -57,7 +110,8 @@ export default function VerificationForm() {
     setError(null);
 
     // Basic validation
-    if (!formData.fullName.trim()) { setError('Full name is required'); return; }
+    if (!formData.firstName.trim()) { setError('First name is required'); return; }
+    if (!formData.lastName.trim()) { setError('Last name is required'); return; }
     if (!formData.registrationNumber.trim()) { setError('Registration number is required'); return; }
     if (!formData.email.trim()) { setError('Email is required'); return; }
     if (degrees.length === 0 || !degrees[0].name.trim()) { setError('At least one degree is required'); return; }
@@ -66,11 +120,15 @@ export default function VerificationForm() {
     try {
       // Build FormData for multipart upload
       const fd = new FormData();
-      fd.append('fullName', formData.fullName);
+      fd.append('firstName', formData.firstName);
+      fd.append('middleName', formData.middleName);
+      fd.append('lastName', formData.lastName);
       fd.append('phone', formData.phone);
       fd.append('email', formData.email);
       fd.append('registrationNumber', formData.registrationNumber);
       fd.append('yearsOfPractice', formData.yearsOfPractice);
+      fd.append('specialisation', formData.specialisation);
+      fd.append('imaVerified', imaVerified === true ? 'true' : 'false');
 
       // Degrees metadata and files
       const degreesMeta = degrees.map(d => ({ name: d.name }));
@@ -126,8 +184,23 @@ export default function VerificationForm() {
 
   return (
     <form className="verification-form" onSubmit={handleSubmit}>
-      <h2>Doctor Verification</h2>
-      <p className="hint">Please provide your credentials and upload relevant documents for verification.</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+        <h2 style={{ margin: 0 }}>Doctor Verification</h2>
+        {imaVerified === true && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#22c55e', fontSize: 14 }}>
+            <FaCheckCircle /> IMA Verified
+          </span>
+        )}
+        {imaVerified === false && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#f59e0b', fontSize: 14 }}>
+            <FaTimesCircle /> Not found in IMA
+          </span>
+        )}
+      </div>
+      <p className="hint" style={{ color: '#666', marginBottom: '1rem' }}>
+        Please provide your credentials and upload relevant documents for verification.
+        {imaVerified !== true && <span style={{ color: '#888' }}> (Degrees to be verified soon)</span>}
+      </p>
 
       {error && <div className="error-banner" style={{ background: '#fee', color: '#c00', padding: '0.75rem 1rem', borderRadius: 8, marginBottom: '1rem' }}>{error}</div>}
 
@@ -136,8 +209,16 @@ export default function VerificationForm() {
         <legend style={{ fontWeight: 600, padding: '0 0.5rem' }}>Personal Information</legend>
         <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <label className="field">
-            <span>Full Name <span style={{ color: 'red' }}>*</span></span>
-            <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="Dr. John Doe" required />
+            <span>First Name <span style={{ color: 'red' }}>*</span></span>
+            <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} placeholder="John" required />
+          </label>
+          <label className="field">
+            <span>Middle Name <span style={{ color: '#999', fontSize: 12 }}>(optional)</span></span>
+            <input type="text" name="middleName" value={formData.middleName} onChange={handleChange} placeholder="William" />
+          </label>
+          <label className="field">
+            <span>Last Name <span style={{ color: 'red' }}>*</span></span>
+            <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} placeholder="Doe" required />
           </label>
           <label className="field">
             <span>Phone Number</span>
@@ -147,9 +228,38 @@ export default function VerificationForm() {
             <span>Email <span style={{ color: 'red' }}>*</span></span>
             <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="doctor@example.com" required />
           </label>
+        </div>
+        
+        {/* IMA Verification Button */}
+        <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="btn secondary"
+            onClick={verifyWithIMA}
+            disabled={imaVerifying || (!formData.firstName.trim() && !formData.lastName.trim())}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            {imaVerifying ? <><FaSpinner className="spin" /> Verifying...</> : 'Verify with IMA India'}
+          </button>
+          {imaVerified === true && imaResult && (
+            <span style={{ fontSize: 13, color: '#22c55e' }}>
+              ✓ Verified: {imaResult.firstName} {imaResult.lastName} ({imaResult.branch}, {imaResult.state})
+            </span>
+          )}
+        </div>
+      </fieldset>
+
+      {/* Professional Information */}
+      <fieldset style={{ border: '1px solid var(--color-border, #e0e0e0)', borderRadius: 10, padding: '1rem 1.25rem', marginBottom: '1.25rem' }}>
+        <legend style={{ fontWeight: 600, padding: '0 0.5rem' }}>Professional Information</legend>
+        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <label className="field">
             <span>Medical Registration Number <span style={{ color: 'red' }}>*</span></span>
             <input type="text" name="registrationNumber" value={formData.registrationNumber} onChange={handleChange} placeholder="MCI/2015/12345" required />
+          </label>
+          <label className="field">
+            <span>Specialisation <span style={{ color: 'red' }}>*</span></span>
+            <input type="text" name="specialisation" value={formData.specialisation} onChange={handleChange} placeholder="Cardiology, Pediatrics, etc." required />
           </label>
           <label className="field">
             <span>Years of Practice</span>

@@ -65,19 +65,168 @@ export default function Landing() {
       {/* Overview Section */}
       <section id="overview" className="section overview">
         <div className="container">
-          <h2>Transforming Healthcare Connectivity</h2>
-          <div className="overview-card">
-            <p className="section-description">
-              MediChain is a decentralized healthcare management platform that unifies patients, doctors, 
-              and pharmacies under one transparent and secure system. It leverages <strong>blockchain</strong> for 
-              tamper-proof prescription storage and <strong>GenAI</strong> for smart symptom classification 
-              and doctor recommendations.
-            </p>
-            <div className="goal-statement">
-              <p>
-                Our goal is to eliminate prescription fraud, simplify medicine discovery, 
-                and make healthcare data interoperable, verifiable, and patient-centric.
-              </p>
+          <h2>How It Works</h2>
+          <p className="overview-intro">
+            MediChain revolutionizes healthcare management by connecting patients, doctors, and pharmacies 
+            through cutting-edge blockchain and AI technology.
+          </p>
+          <div className="overview-grid">
+            <div className="overview-flow-card">
+              <div className="flow-header">
+                <FaLink size={28} color="#00A9FF" />
+                <h3>Blockchain Prescription Flow</h3>
+              </div>
+              <div className="flow-steps">
+                <div className="step">
+                  <span className="step-number">1</span>
+                  <p>Doctor creates a prescription → JSON object generated</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">2</span>
+                  <p>Prescription is hashed and uploaded to blockchain → transaction hash returned</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">3</span>
+                  <p>Hash stored in backend DB linked to doctor, patient, and pharmacy IDs</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">4</span>
+                  <p>Pharmacy scans prescription QR → hash verified on blockchain</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">5</span>
+                  <p>Patient dashboard fetches verified prescriptions from blockchain</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="overview-flow-card">
+              <div className="flow-header">
+                <FaRobot size={28} color="#00A9FF" />
+                <h3>AI Chatbot Flow</h3>
+              </div>
+              <div className="flow-steps">
+                <div className="step">
+                  <span className="step-number">1</span>
+                  <p>Patient interacts with chatbot and describes symptoms</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">2</span>
+                  <p>Generative AI model categorizes symptoms into medical specializations</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">3</span>
+                  <p>Returns a list of relevant doctors nearby, fetched from the database</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="overview-flow-card">
+              <div className="flow-header">
+                <FaMapMarkerAlt size={28} color="#00A9FF" />
+                <h3>Medicine Search & Map Integration</h3>
+              </div>
+              <div className="flow-steps">
+                <div className="step">
+                  <span className="step-number">1</span>
+                  <p>Each pharmacy updates inventory with available medicines</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">2</span>
+                  <p>Patients search for a medicine name</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">3</span>
+                  <p>The app queries all pharmacy databases and filters by geolocation</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">4</span>
+                  <p>Nearby pharmacies are displayed as map markers with directions</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="overview-flow-card">
+              <div className="flow-header">
+                <FaCheckCircle size={28} color="#00A9FF" />
+                <h3>Prescription Verification Flow</h3>
+              </div>
+              <div className="flow-steps">
+                <div className="step">
+                  <span className="step-number">1</span>
+                  <p>Doctor generates prescription with unique QR code</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">2</span>
+                  <p>Patient receives digital prescription on their dashboard</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">3</span>
+                  <p>Pharmacy scans QR code to retrieve prescription data</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">4</span>
+                  <p>System verifies hash against blockchain for authenticity</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">5</span>
+                  <p>Verified prescription allows medicine dispensing</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="overview-flow-card">
+              <div className="flow-header">
+                <FaBoxes size={28} color="#00A9FF" />
+                <h3>Inventory Management Flow</h3>
+              </div>
+              <div className="flow-steps">
+                <div className="step">
+                  <span className="step-number">1</span>
+                  <p>Pharmacy adds medicines to inventory with QR codes</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">2</span>
+                  <p>Stock levels are updated in real-time database</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">3</span>
+                  <p>Patients can search and view available medicines</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">4</span>
+                  <p>Pharmacy scans medicine QR during billing</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">5</span>
+                  <p>Inventory automatically updates after each transaction</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="overview-flow-card">
+              <div className="flow-header">
+                <FaShieldAlt size={28} color="#00A9FF" />
+                <h3>Data Security & Privacy Flow</h3>
+              </div>
+              <div className="flow-steps">
+                <div className="step">
+                  <span className="step-number">1</span>
+                  <p>User data is encrypted before storage</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">2</span>
+                  <p>Sensitive information hashed and stored on blockchain</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">3</span>
+                  <p>Access control ensures only authorized users view data</p>
+                </div>
+                <div className="step">
+                  <span className="step-number">4</span>
+                  <p>Audit trail maintained for all data access</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

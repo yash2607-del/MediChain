@@ -30,8 +30,10 @@ export default function AddMedicineForm({ addMedicine, pharmacyId }) {
     setSaving(true);
     setStatus('');
     try {
-      const base = import.meta.env.VITE_API_BASE_URL || '/';
-      const url = new URL('api/inventory', base).toString();
+      const base = import.meta.env?.VITE_API_BASE_URL;
+      const url = base
+        ? new URL('api/inventory', base.endsWith('/') ? base : `${base}/`).toString()
+        : '/api/inventory';
       const payload = {
         pharmacyId,
         name: form.name,

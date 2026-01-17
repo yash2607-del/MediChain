@@ -12,6 +12,19 @@ export default function PrescriptionTable() {
   const [items, setItems] = useState([]);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState('');
+  
+  // OTP sharing state
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpData, setOtpData] = useState(null);
+  const [sharingId, setSharingId] = useState(null);
+  const [lockingId, setLockingId] = useState(null);
+  
+  // Pharmacy selector state
+  const [showPharmacyModal, setShowPharmacyModal] = useState(false);
+  const [pharmacies, setPharmacies] = useState([]);
+  const [pharmaciesLoading, setPharmaciesLoading] = useState(false);
+  const [selectedPharmacy, setSelectedPharmacy] = useState(null);
+  const [pendingSharePrescription, setPendingSharePrescription] = useState(null);
 
   const session = useMemo(() => {
     try { return JSON.parse(localStorage.getItem('session') || 'null') } catch { return null }
@@ -238,6 +251,109 @@ export default function PrescriptionTable() {
     }
   };
 
+  // Share prescription - First show pharmacy selector
+  const handleShare = async (prescription) => {
+    const id = prescription._id;
+    setSharingId(id);
+    setPendingSharePrescription(prescription);
+    setPharmaciesLoading(true);
+    setPharmacies([]);
+    setSelectedPharmacy(null);
+    setShowPharmacyModal(true);
+    
+    try {
+      const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      const res = await fetch(`${base}/api/prescriptions/${id}/pharmacies`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch pharmacies');
+      
+      setPharmacies(data.pharmacies || []);
+    } catch (err) {
+      setError(err.message || 'Failed to load pharmacies');
+      setShowPharmacyModal(false);
+    } finally {
+      setPharmaciesLoading(false);
+      setSharingId(null);
+    }
+  };
+
+  // Confirm share with selected pharmacy - Generate OTP
+  const confirmShare = async () => {
+    if (!pendingSharePrescription) return;
+    
+    const id = pendingSharePrescription._id;
+    try {
+      const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      const res = await fetch(`${base}/api/prescriptions/${id}/share`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pharmacyId: selectedPharmacy?._id })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to generate OTP');
+      
+      setOtpData({ 
+        prescriptionId: id, 
+        otp: data.otp, 
+        expiresAt: data.expiresAt,
+        pharmacy: selectedPharmacy
+      });
+      setShowPharmacyModal(false);
+      setShowOtpModal(true);
+      
+      // Update item's lock status in list
+      setItems(prev => prev.map(p => 
+        p._id === id ? { ...p, isLocked: false } : p
+      ));
+    } catch (err) {
+      setError(err.message || 'Failed to share prescription');
+    }
+  };
+
+  const closePharmacyModal = () => {
+    setShowPharmacyModal(false);
+    setPendingSharePrescription(null);
+    setSelectedPharmacy(null);
+    setPharmacies([]);
+  };
+
+  // Lock prescription - Revoke pharmacy access
+  const handleLock = async (prescription) => {
+    const id = prescription._id;
+    setLockingId(id);
+    try {
+      const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      const res = await fetch(`${base}/api/prescriptions/${id}/lock`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to lock prescription');
+      
+      // Update item's lock status in list
+      setItems(prev => prev.map(p => 
+        p._id === id ? { ...p, isLocked: true } : p
+      ));
+    } catch (err) {
+      setError(err.message || 'Failed to lock prescription');
+    } finally {
+      setLockingId(null);
+    }
+  };
+
+  // Copy OTP to clipboard
+  const copyOtp = () => {
+    if (otpData?.otp) {
+      navigator.clipboard.writeText(otpData.otp);
+      alert('OTP copied to clipboard!');
+    }
+  };
+
+  const closeOtpModal = () => {
+    setShowOtpModal(false);
+    setOtpData(null);
+  };
+
   const closeModal = () => {
     setShowModal(false);
     setSelectedPrescription(null);
@@ -316,8 +432,32 @@ export default function PrescriptionTable() {
                       onClick={() => handleDownload(p)}
                       title="Download Prescription"
                     >
-                      <FaDownload /> Download
+                      <FaDownload />
                     </button>
+                    {/* Share button - generates OTP for pharmacy */}
+                    <button
+                      className="btn-share"
+                      onClick={() => handleShare(p)}
+                      disabled={sharingId === p._id}
+                      title="Share with Pharmacy (Generate OTP)"
+                    >
+                      <FaShareAlt /> {sharingId === p._id ? '...' : 'Share'}
+                    </button>
+                    {/* Make Private / Lock button */}
+                    {p.isLocked === false ? (
+                      <button
+                        className="btn-lock"
+                        onClick={() => handleLock(p)}
+                        disabled={lockingId === p._id}
+                        title="Make Private (Revoke Pharmacy Access)"
+                      >
+                        <FaLock /> {lockingId === p._id ? '...' : 'Private'}
+                      </button>
+                    ) : (
+                      <span className="status-private" title="This prescription is private">
+                        <FaLock /> Private
+                      </span>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -325,6 +465,212 @@ export default function PrescriptionTable() {
           </tbody>
         </table>
       </div>
+
+      {/* Pharmacy Selector Modal */}
+      {showPharmacyModal && (
+        <div className="modal-overlay" onClick={closePharmacyModal}>
+          <div className="modal-content pharmacy-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '550px' }}>
+            <div className="modal-header">
+              <h2><FaStore style={{ marginRight: '0.5rem' }} /> Select Pharmacy</h2>
+              <button className="modal-close" onClick={closePharmacyModal}>
+                <FaTimes />
+              </button>
+            </div>
+            <div className="modal-body">
+              {pharmaciesLoading ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                  Loading pharmacies...
+                </div>
+              ) : pharmacies.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                  <FaExclamationTriangle style={{ fontSize: '2rem', color: '#f59e0b', marginBottom: '1rem' }} />
+                  <p>No pharmacies registered in the system yet.</p>
+                </div>
+              ) : (
+                <>
+                  <p style={{ marginBottom: '1rem', color: '#666', fontSize: '0.9rem' }}>
+                    Select a pharmacy to share your prescription with:
+                  </p>
+                  <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                    {pharmacies.map((pharmacy) => (
+                      <div
+                        key={pharmacy._id}
+                        onClick={() => setSelectedPharmacy(pharmacy)}
+                        style={{
+                          padding: '1rem',
+                          border: selectedPharmacy?._id === pharmacy._id 
+                            ? '2px solid #3b82f6' 
+                            : '1px solid #e5e7eb',
+                          borderRadius: '10px',
+                          marginBottom: '0.75rem',
+                          cursor: 'pointer',
+                          background: selectedPharmacy?._id === pharmacy._id 
+                            ? '#f0f9ff' 
+                            : '#fff',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ 
+                              fontWeight: '600', 
+                              color: '#1f2937',
+                              fontSize: '1rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}>
+                              <FaStore style={{ color: '#3b82f6' }} />
+                              {pharmacy.name}
+                            </div>
+                            <div style={{ 
+                              fontSize: '0.8rem', 
+                              color: '#6b7280',
+                              marginTop: '0.25rem',
+                              paddingLeft: '1.5rem'
+                            }}>
+                              {pharmacy.address}
+                            </div>
+                          </div>
+                          <div style={{ 
+                            textAlign: 'right',
+                            flexShrink: 0,
+                            marginLeft: '1rem'
+                          }}>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.3rem',
+                              padding: '0.3rem 0.6rem',
+                              borderRadius: '20px',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                              background: pharmacy.hasNoMedicines ? '#fee2e2' : (pharmacy.hasAllMedicines ? '#dcfce7' : '#fef3c7'),
+                              color: pharmacy.hasNoMedicines ? '#dc2626' : (pharmacy.hasAllMedicines ? '#166534' : '#92400e')
+                            }}>
+                              {pharmacy.hasNoMedicines ? <FaTimes /> : (pharmacy.hasAllMedicines ? <FaCheck /> : <FaExclamationTriangle />)}
+                              {pharmacy.availabilityText}
+                            </span>
+                            {!pharmacy.hasAllMedicines && pharmacy.unavailableMedicines?.length > 0 && (
+                              <div style={{ 
+                                fontSize: '0.7rem', 
+                                color: '#ef4444',
+                                marginTop: '0.3rem'
+                              }}>
+                                Missing: {pharmacy.unavailableMedicines.slice(0, 2).join(', ')}
+                                {pharmacy.unavailableMedicines.length > 2 && '...'}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            {pharmacies.length > 0 && (
+              <div className="modal-footer" style={{ 
+                display: 'flex', 
+                gap: '0.75rem', 
+                justifyContent: 'flex-end',
+                borderTop: '1px solid #e5e7eb',
+                paddingTop: '1rem',
+                marginTop: '1rem'
+              }}>
+                <button 
+                  className="btn-lock"
+                  onClick={closePharmacyModal}
+                  style={{ background: '#e5e7eb', color: '#374151' }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="btn-share"
+                  onClick={confirmShare}
+                  disabled={!selectedPharmacy}
+                  style={{ opacity: selectedPharmacy ? 1 : 0.5 }}
+                >
+                  <FaShareAlt /> Generate OTP
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* OTP Share Modal */}
+      {showOtpModal && otpData && (
+        <div className="modal-overlay" onClick={closeOtpModal}>
+          <div className="modal-content otp-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><FaShareAlt style={{ marginRight: '0.5rem' }} /> Share Prescription</h2>
+              <button className="modal-close" onClick={closeOtpModal}>
+                <FaTimes />
+              </button>
+            </div>
+            <div className="modal-body" style={{ textAlign: 'center' }}>
+              {otpData.pharmacy && (
+                <div style={{ 
+                  background: '#f0f9ff', 
+                  border: '1px solid #bfdbfe',
+                  borderRadius: '8px', 
+                  padding: '0.75rem',
+                  marginBottom: '1rem',
+                  textAlign: 'left'
+                }}>
+                  <div style={{ fontSize: '0.85rem', color: '#1e40af', fontWeight: '600' }}>
+                    <FaStore style={{ marginRight: '0.4rem' }} />
+                    {otpData.pharmacy.name}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
+                    {otpData.pharmacy.address}
+                  </div>
+                </div>
+              )}
+              <p style={{ marginBottom: '1rem', color: '#666' }}>
+                Share this <strong>4-digit OTP</strong> with the pharmacy to allow them to view your prescription.
+              </p>
+              <div style={{ 
+                fontSize: '3rem', 
+                fontWeight: 'bold', 
+                letterSpacing: '1rem',
+                background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                border: '3px dashed #3b82f6',
+                borderRadius: '16px',
+                padding: '1.5rem 2rem',
+                marginBottom: '1.5rem',
+                color: '#1e40af',
+                fontFamily: 'monospace'
+              }}>
+                {otpData.otp}
+              </div>
+              <button 
+                className="btn-view" 
+                onClick={copyOtp}
+                style={{ marginBottom: '1rem', padding: '0.75rem 1.5rem' }}
+              >
+                <FaCopy /> Copy OTP
+              </button>
+              <div style={{ 
+                background: '#fef3c7', 
+                border: '1px solid #f59e0b', 
+                borderRadius: '8px', 
+                padding: '0.75rem', 
+                marginTop: '1rem' 
+              }}>
+                <p style={{ fontSize: '0.85rem', color: '#92400e', margin: 0 }}>
+                  ⏱️ Expires at <strong>{new Date(otpData.expiresAt).toLocaleTimeString()}</strong>
+                </p>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '1rem' }}>
+                <FaLock style={{ marginRight: '0.3rem' }} />
+                Prescription will automatically become private after billing.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* View Modal */}
       {showModal && (
