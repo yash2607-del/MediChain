@@ -493,6 +493,7 @@
     bottom: 0;
     background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0,169,255,0.15)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
     opacity: 0.4;
+    pointer-events: none;
   }
 
   // Shine effect overlay
@@ -511,6 +512,7 @@
     );
     animation: shine 3s ease-in-out infinite;
     z-index: 1;
+    pointer-events: none;
   }
 
   @keyframes shine {

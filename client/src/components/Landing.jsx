@@ -237,7 +237,7 @@ export default function Landing() {
         <div className="container">
           <h2>Built for Every Healthcare Stakeholder</h2>
           <div className="roles-grid">
-            <div className="role-card" onClick={() => navigate('/doctors')}>
+            <div className="role-card" onClick={() => navigate('/auth/doctor')}>
               <div className="role-icon">
                 <FaUserMd size={48} color="#00A9FF" />
               </div>
@@ -250,7 +250,7 @@ export default function Landing() {
               <button className="btn outline">For Doctors →</button>
             </div>
 
-            <div className="role-card" onClick={() => navigate('/patients')}>
+            <div className="role-card" onClick={() => navigate('/auth/patient')}>
               <div className="role-icon">
                 <FaUser size={48} color="#00A9FF" />
               </div>
@@ -263,7 +263,7 @@ export default function Landing() {
               <button className="btn outline">For Patients →</button>
             </div>
 
-            <div className="role-card" onClick={() => navigate('/pharmacies')}>
+            <div className="role-card" onClick={() => navigate('/auth/pharmacy')}>
               <div className="role-icon">
                 <FaClinicMedical size={48} color="#00A9FF" />
               </div>
