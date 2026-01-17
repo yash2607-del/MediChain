@@ -30,38 +30,90 @@ export const addInventory = async (req, res) => {
       return res.status(400).json({ error: 'pharmacyId and name are required' });
     }
 
+    const qtyNum = Number(quantity);
+    if (!Number.isFinite(qtyNum) || qtyNum <= 0) {
+      return res.status(400).json({ error: 'quantity must be a positive number' });
+    }
+
+    const normalizedName = String(name).trim();
+    const normalizedDrugCode = drugCode ? String(drugCode).trim() : '';
+
     if (dbConnected()) {
-      // Upsert by (pharmacyId, name): if exists, increment quantity; otherwise create new
-      const existing = await Inventory.findOne({ pharmacyId, name });
+      // Prefer upsert by (pharmacyId, drugCode) since billing uses drugCode.
+      // Fallback to (pharmacyId, name) when drugCode is not provided.
+      const findQuery = normalizedDrugCode
+        ? { pharmacyId, drugCode: normalizedDrugCode }
+        : { pharmacyId, name: normalizedName };
+
+      const existing = await Inventory.findOne(findQuery);
       if (existing) {
-        existing.quantity = Number(existing.quantity || 0) + Number(quantity || 0);
+        existing.quantity = Number(existing.quantity || 0) + qtyNum;
+        // Backfill a missing drugCode on older records so billing can work reliably.
+        if (!existing.drugCode && !normalizedDrugCode) {
+          existing.drugCode = `MED-${String(pharmacyId).slice(-6)}-${Date.now().toString(36)}`;
+        }
         // Optionally refresh meta fields if provided
         if (batch) existing.batch = batch;
         if (expiry) existing.expiry = expiry;
         if (manufacturer) existing.manufacturer = manufacturer;
         if (typeof price !== 'undefined') existing.price = price;
-        if (drugCode) existing.drugCode = drugCode;
+        // If client didn't provide a code, keep the existing one.
+        // If it did, ensure we store the trimmed version.
+        if (normalizedDrugCode) existing.drugCode = normalizedDrugCode;
         await existing.save();
         return res.json(existing);
       }
-      const newItem = new Inventory({ pharmacyId, name, quantity: Number(quantity)||1, batch, expiry, manufacturer, price, drugCode });
+
+      // Ensure new inventory entries always get a usable drugCode (Billing UI relies on it).
+      const generatedDrugCode = `MED-${String(pharmacyId).slice(-6)}-${Date.now().toString(36)}`;
+      const finalDrugCode = normalizedDrugCode || generatedDrugCode;
+
+      const newItem = new Inventory({
+        pharmacyId,
+        name: normalizedName,
+        quantity: qtyNum,
+        batch,
+        expiry,
+        manufacturer,
+        price,
+        drugCode: finalDrugCode
+      });
       await newItem.save();
       return res.json(newItem);
     }
     // fallback: upsert in mock array
-    const idx = mockInventory.findIndex(i => i.pharmacyId === pharmacyId && i.name === name);
+    const idx = normalizedDrugCode
+      ? mockInventory.findIndex(i => i.pharmacyId === pharmacyId && i.drugCode === normalizedDrugCode)
+      : mockInventory.findIndex(i => i.pharmacyId === pharmacyId && i.name === normalizedName);
     if (idx !== -1) {
       const updated = { ...mockInventory[idx] };
-      updated.quantity = Number(updated.quantity || 0) + Number(quantity || 0);
+      updated.quantity = Number(updated.quantity || 0) + qtyNum;
+      if (!updated.drugCode && !normalizedDrugCode) {
+        updated.drugCode = `MED-${String(pharmacyId).slice(-6)}-${Date.now().toString(36)}`;
+      }
       if (batch) updated.batch = batch;
       if (expiry) updated.expiry = expiry;
       if (manufacturer) updated.manufacturer = manufacturer;
       if (typeof price !== 'undefined') updated.price = price;
-      if (drugCode) updated.drugCode = drugCode;
+      if (normalizedDrugCode) updated.drugCode = normalizedDrugCode;
       mockInventory[idx] = updated;
       return res.json(updated);
     }
-    const item = { _id: String(Date.now()), pharmacyId, name, quantity: Number(quantity)||1, batch, expiry, manufacturer, price, drugCode };
+
+    const generatedDrugCode = `MED-${String(pharmacyId).slice(-6)}-${Date.now().toString(36)}`;
+    const finalDrugCode = normalizedDrugCode || generatedDrugCode;
+
+    const item = {
+      _id: String(Date.now()),
+      pharmacyId,
+      name: normalizedName,
+      quantity: qtyNum,
+      batch,
+      expiry,
+      manufacturer,
+      price,
+      drugCode: finalDrugCode
+    };
     mockInventory.push(item);
     return res.json(item);
   } catch (err) {
