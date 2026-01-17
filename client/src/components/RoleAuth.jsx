@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useParams } from 'react-router-dom'
+import { FaEye, FaEyeSlash, FaUserMd, FaUser, FaHospital, FaShieldAlt, FaPills, FaHeartbeat, FaMapMarkerAlt, FaCheckCircle } from 'react-icons/fa'
 import TagsInput from './TagsInput.jsx'
 import MapPicker from './MapPicker.jsx'
  
@@ -20,6 +21,8 @@ export default function RoleAuth() {
   const validRole = ['doctor', 'patient', 'pharmacy'].includes(role) ? role : null
   const [mode, setMode] = useState('login')
   const [message, setMessage] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loginData, setLoginData] = useState({ email: '', password: '' })
 
   const [patientData, setPatientData] = useState({
@@ -125,17 +128,44 @@ export default function RoleAuth() {
     )
   }
 
-  // Role info for left panel
+  // Role info for left panel with icons
   const roleInfo = useMemo(() => {
     switch (validRole) {
       case 'patient':
-        return { title: 'Welcome, Patient', subtitle: 'Your health, your control', points: ['Access verified prescriptions securely','Find medicines nearby on the map','Get AI-assisted guidance to the right doctor'] }
+        return { 
+          icon: <FaUser />,
+          title: 'Your Health, Your Control', 
+          subtitle: 'Access world-class healthcare at your fingertips', 
+          points: [
+            { icon: <FaShieldAlt />, text: 'Secure blockchain-based prescription records' },
+            { icon: <FaMapMarkerAlt />, text: 'Find verified pharmacies and medicines instantly' },
+            { icon: <FaHeartbeat />, text: 'AI-powered doctor recommendations' }
+          ]
+        }
       case 'doctor':
-        return { title: 'Welcome, Doctor', subtitle: 'Streamlined and secure care', points: ['Create tamper-proof prescriptions on-chain','View patient history with confidence','Build trust with verifiable records'] }
+        return { 
+          icon: <FaUserMd />,
+          title: 'Empowering Healthcare Professionals', 
+          subtitle: 'Deliver care with confidence and security', 
+          points: [
+            { icon: <FaCheckCircle />, text: 'Create tamper-proof digital prescriptions' },
+            { icon: <FaShieldAlt />, text: 'Access complete patient medical history' },
+            { icon: <FaHeartbeat />, text: 'Build trust through verifiable credentials' }
+          ]
+        }
       case 'pharmacy':
-        return { title: 'Welcome, Pharmacy', subtitle: 'Reliable inventory and verification', points: ['Verify prescriptions via blockchain','Manage real-time stock with ease','Serve patients faster with confidence'] }
+        return { 
+          icon: <FaPills />,
+          title: 'Smart Pharmacy Management', 
+          subtitle: 'Streamline operations with blockchain verification', 
+          points: [
+            { icon: <FaCheckCircle />, text: 'Instantly verify prescription authenticity' },
+            { icon: <FaHospital />, text: 'Real-time inventory and billing management' },
+            { icon: <FaShieldAlt />, text: 'Reduce fraud with blockchain security' }
+          ]
+        }
       default:
-        return { title: '', subtitle: '', points: [] }
+        return { icon: null, title: '', subtitle: '', points: [] }
     }
   }, [validRole])
 
@@ -201,10 +231,38 @@ export default function RoleAuth() {
         return (
           <form onSubmit={handleSignupSubmit} className="auth-form">
             <div className="two-col">
-              <div className="form-field"><label>Name</label><input value={patientData.name} onChange={e=>setPatientData({...patientData,name:e.target.value})} /></div>
-              <div className="form-field"><label>Email</label><input type="email" value={patientData.email} onChange={e=>setPatientData({...patientData,email:e.target.value})} required /></div>
-              <div className="form-field"><label>Password</label><input type="password" value={patientData.password} onChange={e=>setPatientData({...patientData,password:e.target.value})} required /></div>
-              <div className="form-field"><label>Phone</label><input value={patientData.phone} onChange={e=>setPatientData({...patientData,phone:e.target.value})} /></div>
+              <div className="form-field">
+                <label>Name</label>
+                <input value={patientData.name} onChange={e=>setPatientData({...patientData,name:e.target.value})} placeholder="Your full name" />
+              </div>
+              <div className="form-field">
+                <label>Email</label>
+                <input type="email" value={patientData.email} onChange={e=>setPatientData({...patientData,email:e.target.value})} required placeholder="your@email.com" />
+              </div>
+              <div className="form-field password-field">
+                <label>Password</label>
+                <div className="password-input-wrapper">
+                  <input 
+                    type={showPassword ? 'text' : 'password'} 
+                    value={patientData.password} 
+                    onChange={e=>setPatientData({...patientData,password:e.target.value})} 
+                    required 
+                    placeholder="Create a password"
+                  />
+                  <button 
+                    type="button" 
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+              <div className="form-field">
+                <label>Phone</label>
+                <input value={patientData.phone} onChange={e=>setPatientData({...patientData,phone:e.target.value})} placeholder="Your phone number" />
+              </div>
               <div className="form-field"><label>Age</label><input type="number" value={patientData.age} onChange={e=>setPatientData({...patientData,age:e.target.value})} /></div>
               <div className="form-field"><label>Weight (kg)</label><input type="number" value={patientData.weight} onChange={e=>setPatientData({...patientData,weight:e.target.value})} /></div>
               <div className="form-field"><label>Height (cm)</label><input type="number" value={patientData.height} onChange={e=>setPatientData({...patientData,height:e.target.value})} /></div>
@@ -226,12 +284,46 @@ export default function RoleAuth() {
         return (
           <form onSubmit={handleSignupSubmit} className="auth-form">
             <div className="two-col">
-              <div className="form-field"><label>Name</label><input value={doctorData.name} onChange={e=>setDoctorData({...doctorData,name:e.target.value})} /></div>
-              <div className="form-field"><label>Reg Number</label><input value={doctorData.regNumber} onChange={e=>setDoctorData({...doctorData,regNumber:e.target.value})} /></div>
-              <div className="form-field"><label>Email</label><input type="email" value={doctorData.email} onChange={e=>setDoctorData({...doctorData,email:e.target.value})} required /></div>
-              <div className="form-field"><label>Password</label><input type="password" value={doctorData.password} onChange={e=>setDoctorData({...doctorData,password:e.target.value})} required /></div>
-              <div className="form-field"><label>Phone</label><input value={doctorData.phone} onChange={e=>setDoctorData({...doctorData,phone:e.target.value})} /></div>
-              <div className="form-field"><label>Education</label><input value={doctorData.education} onChange={e=>setDoctorData({...doctorData,education:e.target.value})} /></div>
+              <div className="form-field">
+                <label>Name</label>
+                <input value={doctorData.name} onChange={e=>setDoctorData({...doctorData,name:e.target.value})} placeholder="Dr. Your Name" />
+              </div>
+              <div className="form-field">
+                <label>Reg Number</label>
+                <input value={doctorData.regNumber} onChange={e=>setDoctorData({...doctorData,regNumber:e.target.value})} placeholder="Your registration number" />
+              </div>
+              <div className="form-field">
+                <label>Email</label>
+                <input type="email" value={doctorData.email} onChange={e=>setDoctorData({...doctorData,email:e.target.value})} required placeholder="your@email.com" />
+              </div>
+              <div className="form-field password-field">
+                <label>Password</label>
+                <div className="password-input-wrapper">
+                  <input 
+                    type={showPassword ? 'text' : 'password'} 
+                    value={doctorData.password} 
+                    onChange={e=>setDoctorData({...doctorData,password:e.target.value})} 
+                    required 
+                    placeholder="Create a password"
+                  />
+                  <button 
+                    type="button" 
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+              <div className="form-field">
+                <label>Phone</label>
+                <input value={doctorData.phone} onChange={e=>setDoctorData({...doctorData,phone:e.target.value})} placeholder="Your phone number" />
+              </div>
+              <div className="form-field">
+                <label>Education</label>
+                <input value={doctorData.education} onChange={e=>setDoctorData({...doctorData,education:e.target.value})} placeholder="MBBS, MD, etc." />
+              </div>
               <div className="form-field"><label>Years of Experience</label><input type="number" value={doctorData.experienceYears} onChange={e=>setDoctorData({...doctorData,experienceYears:e.target.value})} /></div>
             </div>
             <TagsInput label="Specialties" value={doctorData.specialties} onChange={v=>setDoctorData({...doctorData,specialties:v})} />
@@ -243,10 +335,38 @@ export default function RoleAuth() {
         return (
           <form onSubmit={handleSignupSubmit} className="auth-form">
             <div className="two-col">
-              <div className="form-field"><label>Shop Name</label><input value={pharmacyData.shopName} onChange={e=>setPharmacyData({...pharmacyData,shopName:e.target.value})} /></div>
-              <div className="form-field"><label>Email</label><input type="email" value={pharmacyData.email} onChange={e=>setPharmacyData({...pharmacyData,email:e.target.value})} required /></div>
-              <div className="form-field"><label>Password</label><input type="password" value={pharmacyData.password} onChange={e=>setPharmacyData({...pharmacyData,password:e.target.value})} required /></div>
-              <div className="form-field"><label>Phone</label><input value={pharmacyData.phone} onChange={e=>setPharmacyData({...pharmacyData,phone:e.target.value})} /></div>
+              <div className="form-field">
+                <label>Shop Name</label>
+                <input value={pharmacyData.shopName} onChange={e=>setPharmacyData({...pharmacyData,shopName:e.target.value})} placeholder="Pharmacy name" />
+              </div>
+              <div className="form-field">
+                <label>Email</label>
+                <input type="email" value={pharmacyData.email} onChange={e=>setPharmacyData({...pharmacyData,email:e.target.value})} required placeholder="pharmacy@email.com" />
+              </div>
+              <div className="form-field password-field">
+                <label>Password</label>
+                <div className="password-input-wrapper">
+                  <input 
+                    type={showPassword ? 'text' : 'password'} 
+                    value={pharmacyData.password} 
+                    onChange={e=>setPharmacyData({...pharmacyData,password:e.target.value})} 
+                    required 
+                    placeholder="Create a password"
+                  />
+                  <button 
+                    type="button" 
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+              <div className="form-field">
+                <label>Phone</label>
+                <input value={pharmacyData.phone} onChange={e=>setPharmacyData({...pharmacyData,phone:e.target.value})} placeholder="Pharmacy phone" />
+              </div>
             </div>
             <MapPicker label="Location" value={pharmacyData.location} onChange={v=>setPharmacyData({...pharmacyData,location:v})} height={220} />
             <button className="btn primary" type="submit">Sign Up as Pharmacy</button>
@@ -266,9 +386,19 @@ export default function RoleAuth() {
       <div className={`auth-card split ${mode==='signup'?'signup-active':''}`}>
         <div className="panel info-panel">
           <div className={`info-inner ${animating?'anim':''}`}>
-            <h3 className="info-title">{roleInfo.title}</h3>
+            <h3 className="info-title">
+              <span className="info-icon">{roleInfo.icon}</span>
+              {roleInfo.title}
+            </h3>
             <p className="info-subtitle">{roleInfo.subtitle}</p>
-            <ul className="info-points">{roleInfo.points.map(p=><li key={p}>{p}</li>)}</ul>
+            <ul className="info-points">
+              {roleInfo.points.map((point, idx) => (
+                <li key={idx}>
+                  <span className="point-icon">{point.icon}</span>
+                  <span className="point-text">{point.text}</span>
+                </li>
+              ))}
+            </ul>
             <div className="info-cta">
               <span className="muted">Mode</span>
               <div className="mode-toggle">
@@ -284,8 +414,30 @@ export default function RoleAuth() {
             {message && <div className="auth-message">{message}</div>}
             {mode==='login' ? (
               <form onSubmit={handleLoginSubmit} className="auth-form">
-                <div className="form-field"><label>Email</label><input type="email" value={loginData.email} onChange={e=>setLoginData({...loginData,email:e.target.value})} required /></div>
-                <div className="form-field"><label>Password</label><input type="password" value={loginData.password} onChange={e=>setLoginData({...loginData,password:e.target.value})} required /></div>
+                <div className="form-field">
+                  <label>Email</label>
+                  <input type="email" value={loginData.email} onChange={e=>setLoginData({...loginData,email:e.target.value})} required placeholder="Enter your email" />
+                </div>
+                <div className="form-field password-field">
+                  <label>Password</label>
+                  <div className="password-input-wrapper">
+                    <input 
+                      type={showPassword ? 'text' : 'password'} 
+                      value={loginData.password} 
+                      onChange={e=>setLoginData({...loginData,password:e.target.value})} 
+                      required 
+                      placeholder="Enter your password"
+                    />
+                    <button 
+                      type="button" 
+                      className="password-toggle"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label="Toggle password visibility"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </div>
                 <button className="btn primary" type="submit">Login</button>
               </form>
             ) : renderSignup()}
