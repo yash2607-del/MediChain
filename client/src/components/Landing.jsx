@@ -66,17 +66,19 @@ export default function Landing() {
       <section id="overview" className="section overview">
         <div className="container">
           <h2>Transforming Healthcare Connectivity</h2>
-          <p className="section-description">
-            MediChain is a decentralized healthcare management platform that unifies patients, doctors, 
-            and pharmacies under one transparent and secure system. It leverages <strong>blockchain</strong> for 
-            tamper-proof prescription storage and <strong>GenAI</strong> for smart symptom classification 
-            and doctor recommendations.
-          </p>
-          <div className="goal-statement">
-            <p>
-              Our goal is to eliminate prescription fraud, simplify medicine discovery, 
-              and make healthcare data interoperable, verifiable, and patient-centric.
+          <div className="overview-card">
+            <p className="section-description">
+              MediChain is a decentralized healthcare management platform that unifies patients, doctors, 
+              and pharmacies under one transparent and secure system. It leverages <strong>blockchain</strong> for 
+              tamper-proof prescription storage and <strong>GenAI</strong> for smart symptom classification 
+              and doctor recommendations.
             </p>
+            <div className="goal-statement">
+              <p>
+                Our goal is to eliminate prescription fraud, simplify medicine discovery, 
+                and make healthcare data interoperable, verifiable, and patient-centric.
+              </p>
+            </div>
           </div>
         </div>
       </section>

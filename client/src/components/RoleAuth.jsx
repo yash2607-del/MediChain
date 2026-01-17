@@ -65,7 +65,6 @@ export default function RoleAuth() {
       }
       return null
     } catch (err) {
-      console.debug('Reverse geocode failed', err)
       return null
     }
   }
@@ -103,7 +102,6 @@ export default function RoleAuth() {
         setMessage('Location detected')
       },
       async (err) => {
-        console.debug('Geolocation error', err)
         setMessage('Unable to get location. Trying IP-based lookup...')
         try {
           const ipRes = await fetch('https://ipapi.co/json/')
@@ -120,11 +118,10 @@ export default function RoleAuth() {
             }
           }
         } catch (ipErr) {
-          console.debug('IP lookup failed', ipErr)
           setMessage('Could not detect location automatically')
         }
       },
-      { timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     )
   }
 
@@ -222,7 +219,6 @@ export default function RoleAuth() {
             </div>
             <TagsInput label="Pre-existing Conditions" value={patientData.conditions} onChange={v=>setPatientData({...patientData,conditions:v})} />
             <MapPicker label="Location" value={patientData.location} onChange={v=>setPatientData({...patientData,location:v})} height={220} />
-            {patientData.location?.address && <div style={{marginTop:8}}><strong>Address:</strong> {patientData.location.address}</div>}
             <button className="btn primary" type="submit">Sign Up as Patient</button>
           </form>
         )
@@ -240,7 +236,6 @@ export default function RoleAuth() {
             </div>
             <TagsInput label="Specialties" value={doctorData.specialties} onChange={v=>setDoctorData({...doctorData,specialties:v})} />
             <MapPicker label="Location" value={doctorData.location} onChange={v=>setDoctorData({...doctorData,location:v})} height={220} />
-            {doctorData.location?.address && <div style={{marginTop:8}}><strong>Address:</strong> {doctorData.location.address}</div>}
             <button className="btn primary" type="submit">Sign Up as Doctor</button>
           </form>
         )
@@ -254,7 +249,6 @@ export default function RoleAuth() {
               <div className="form-field"><label>Phone</label><input value={pharmacyData.phone} onChange={e=>setPharmacyData({...pharmacyData,phone:e.target.value})} /></div>
             </div>
             <MapPicker label="Location" value={pharmacyData.location} onChange={v=>setPharmacyData({...pharmacyData,location:v})} height={220} />
-            {pharmacyData.location?.address && <div style={{marginTop:8}}><strong>Address:</strong> {pharmacyData.location.address}</div>}
             <button className="btn primary" type="submit">Sign Up as Pharmacy</button>
           </form>
         )

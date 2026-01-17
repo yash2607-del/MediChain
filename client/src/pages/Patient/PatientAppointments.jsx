@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaPhoneAlt, FaTimes } from 'react-icons/fa';
+import { FaPhoneAlt, FaTimes, FaClock, FaCheckCircle } from 'react-icons/fa';
 import ChatbotWidget from '../../components/chatbot/ChatbotWidget';
 import './PatientAppointments.css';
 
@@ -141,7 +141,7 @@ export default function PatientAppointments() {
       <div className="appointments-sections">
         {/* Pending Appointments Section */}
         <div className="pending-section">
-          <h2>Pending Appointments</h2>
+          <h2><FaClock style={{ color: '#f59e0b' }} /> Pending Appointments</h2>
           {pendingAppointments.length === 0 ? (
             <p className="empty-message">No pending appointments.</p>
           ) : (
@@ -187,7 +187,7 @@ export default function PatientAppointments() {
 
         {/* Confirmed Appointments Section */}
         <div className="confirmed-section">
-          <h2>Confirmed Appointments</h2>
+          <h2><FaCheckCircle style={{ color: '#10b981' }} /> Confirmed Appointments</h2>
           {confirmedAppointments.length === 0 ? (
             <p className="empty-message">No confirmed appointments.</p>
           ) : (

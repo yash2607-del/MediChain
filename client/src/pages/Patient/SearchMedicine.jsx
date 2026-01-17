@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import '../../styles/search-medicine.scss';
 
@@ -10,13 +10,31 @@ export default function SearchMedicine() {
   const [error, setError] = useState('');
   const [center, setCenter] = useState({ lat: 28.6139, lng: 77.209 }); // Default: Delhi
 
+  function RecenterOnChange({ lat, lng }) {
+    const map = useMap();
+    useEffect(() => {
+      if (typeof lat === 'number' && typeof lng === 'number') {
+        map.setView([lat, lng], map.getZoom(), { animate: true });
+      }
+    }, [lat, lng, map]);
+    return null;
+  }
+
   // Try detecting user location to center map
   useEffect(() => {
     if (!navigator?.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => {},
-      { timeout: 5000 }
+      async () => {
+        try {
+          const r = await fetch('/api/places/detect');
+          if (!r.ok) return;
+          const d = await r.json();
+          const loc = d?.results?.[0]?.geometry?.location;
+          if (loc?.lat && loc?.lng) setCenter({ lat: loc.lat, lng: loc.lng });
+        } catch {}
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   }, []);
 
@@ -34,11 +52,17 @@ export default function SearchMedicine() {
     if (!term) { setResults([]); return; }
     setLoading(true);
     try {
-      const base = import.meta.env.VITE_API_BASE_URL || '/';
-      const url = new URL(`/api/inventory/search?name=${encodeURIComponent(term)}`, base).toString();
+      const rawBase = import.meta.env.VITE_API_BASE_URL;
+      const apiBase = rawBase && /^https?:\/\//i.test(rawBase) ? rawBase.replace(/\/$/, '') : '';
+      const url = apiBase
+        ? `${apiBase}/api/inventory/search?name=${encodeURIComponent(term)}`
+        : `/api/inventory/search?name=${encodeURIComponent(term)}`;
+
       const res = await fetch(url);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Search failed');
+      const text = await res.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = {}; }
+      if (!res.ok) throw new Error(data.error || `Search failed (HTTP ${res.status})`);
       setResults(Array.isArray(data.results) ? data.results : []);
     } catch (e) {
       setError(e.message || 'Search failed');
@@ -112,6 +136,7 @@ export default function SearchMedicine() {
         <div className="map-wrap">
           <MapContainer center={[center.lat, center.lng]} zoom={12} style={{ height: '100%', width: '100%' }}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <RecenterOnChange lat={center.lat} lng={center.lng} />
             {results.filter(r => r.location?.lat && r.location?.lng).map(r => (
               <Marker key={r.id} position={[r.location.lat, r.location.lng]} icon={markerIcon}>
                 <Popup>

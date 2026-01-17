@@ -36,7 +36,7 @@ export const reverseGeocode = async (req, res) => {
 
     res.json(formatted);
   } catch (err) {
-    console.error("Reverse geocode error:", err);
+    console.error("Reverse geocode error:", err?.message || err);
     res.status(500).json({ error: "Reverse geocode failed", details: err.message });
   }
 };
@@ -78,7 +78,7 @@ export const detectLocation = async (req, res) => {
 
     res.json(formatted);
   } catch (err) {
-    console.error("Detect location error:", err);
+    console.error("Detect location error:", err?.message || err);
     res.status(500).json({ error: "Detect location failed", details: err.message });
   }
 };

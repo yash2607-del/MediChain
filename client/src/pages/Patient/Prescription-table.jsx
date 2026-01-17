@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FaDownload, FaEye, FaTimes } from 'react-icons/fa';
+import { FaDownload, FaEye, FaTimes, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import './Prescription-table.css';
 
 export default function PrescriptionTable() {
@@ -75,11 +77,165 @@ export default function PrescriptionTable() {
     }
   };
 
-  const handleDownload = (prescription) => {
-    // Simulate download functionality
-    const id = prescription?.id || prescription?._id || 'unknown';
-    alert(`Downloading prescription ${id}...`);
-    console.log('Download prescription:', prescription);
+  const handleDownload = async (prescription) => {
+    try {
+      let prescriptionData = prescription;
+      
+      // If we don't have full details, fetch them
+      if (!prescription.medicines && !prescription.doc) {
+        const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+        const url = `${base}/api/prescriptions/${encodeURIComponent(prescription._id)}`;
+        const res = await fetch(url);
+        const text = await res.text();
+        let data = {};
+        try { data = text ? JSON.parse(text) : {}; } catch { data = {}; }
+        if (res.ok) {
+          prescriptionData = data.doc || prescription;
+        }
+      } else if (prescription.doc) {
+        prescriptionData = prescription.doc;
+      }
+
+      // Create PDF
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      
+      // Header
+      doc.setFillColor(16, 185, 129);
+      doc.rect(0, 0, pageWidth, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont(undefined, 'bold');
+      doc.text('PRESCRIPTION', pageWidth / 2, 20, { align: 'center' });
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'normal');
+      doc.text('MediChain - Blockchain Verified', pageWidth / 2, 30, { align: 'center' });
+      
+      // Reset text color
+      doc.setTextColor(0, 0, 0);
+      
+      let yPos = 55;
+      
+      // Prescription ID
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Prescription ID:', 20, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(prescriptionData._id || 'N/A', 70, yPos);
+      
+      yPos += 10;
+      
+      // Date
+      doc.setFont(undefined, 'bold');
+      doc.text('Date:', 20, yPos);
+      doc.setFont(undefined, 'normal');
+      const dateStr = prescriptionData.createdAt 
+        ? new Date(prescriptionData.createdAt).toLocaleDateString('en-US', { 
+            year: 'numeric', month: 'long', day: 'numeric' 
+          })
+        : 'N/A';
+      doc.text(dateStr, 70, yPos);
+      
+      yPos += 10;
+      
+      // Doctor Name
+      doc.setFont(undefined, 'bold');
+      doc.text('Doctor:', 20, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(prescriptionData.doctorName || prescriptionData.doctor?.name || 'N/A', 70, yPos);
+      
+      yPos += 10;
+      
+      // Patient Email
+      doc.setFont(undefined, 'bold');
+      doc.text('Patient:', 20, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(prescriptionData.patientEmail || userEmail || 'N/A', 70, yPos);
+      
+      yPos += 15;
+      
+      // Diagnosis/Notes
+      if (prescriptionData.notes) {
+        doc.setFont(undefined, 'bold');
+        doc.text('Diagnosis:', 20, yPos);
+        yPos += 7;
+        doc.setFont(undefined, 'normal');
+        const splitNotes = doc.splitTextToSize(prescriptionData.notes, pageWidth - 40);
+        doc.text(splitNotes, 20, yPos);
+        yPos += splitNotes.length * 5 + 10;
+      }
+      
+      // Medicines Table
+      if (prescriptionData.medicines && prescriptionData.medicines.length > 0) {
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(14);
+        doc.text('Prescribed Medicines', 20, yPos);
+        yPos += 10;
+        
+        const tableData = prescriptionData.medicines.map((med, idx) => [
+          idx + 1,
+          med.name || 'N/A',
+          med.dosageValue && med.dosageUnit 
+            ? `${med.dosageValue} ${med.dosageUnit}` 
+            : med.dosageValue || 'N/A',
+          typeof med.timesPerDay === 'number' ? `${med.timesPerDay}x/day` : 'N/A',
+          typeof med.totalDays === 'number' ? `${med.totalDays} days` : 'N/A'
+        ]);
+        
+        doc.autoTable({
+          startY: yPos,
+          head: [['#', 'Medicine Name', 'Dosage', 'Frequency', 'Duration']],
+          body: tableData,
+          theme: 'grid',
+          headStyles: { fillColor: [16, 185, 129], textColor: 255 },
+          styles: { fontSize: 10 },
+          margin: { left: 20, right: 20 }
+        });
+        
+        yPos = doc.lastAutoTable.finalY + 15;
+      }
+      
+      // Verification Status
+      if (yPos + 30 > pageHeight) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Blockchain Verification:', 20, yPos);
+      yPos += 7;
+      
+      doc.setFont(undefined, 'normal');
+      const verificationText = prescription.verified 
+        ? 'This prescription has been verified and is authentic.' 
+        : 'Verification status: Pending or Tampered';
+      doc.text(verificationText, 20, yPos);
+      
+      if (prescription.storedHash) {
+        yPos += 7;
+        doc.setFontSize(8);
+        doc.text(`Hash: ${prescription.storedHash.substring(0, 50)}...`, 20, yPos);
+      }
+      
+      // Footer
+      const footerY = pageHeight - 20;
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text('Generated by MediChain - Secure Prescription Management', pageWidth / 2, footerY, { align: 'center' });
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, pageWidth / 2, footerY + 5, { align: 'center' });
+      
+      // Save PDF
+      const fileName = `Prescription_${prescriptionData._id || 'download'}.pdf`;
+      doc.save(fileName);
+      
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      alert('Failed to generate PDF. Please try again.');
+    }
   };
 
   const closeModal = () => {
@@ -194,7 +350,15 @@ export default function PrescriptionTable() {
                   <div className="detail-row">
                     <span className="detail-label">Verification:</span>
                     <span className="detail-value">
-                      {selectedPrescription.verified ? 'Verified ✓' : 'Tampered ⚠'}
+                      {selectedPrescription.verified ? (
+                        <span style={{ color: '#10b981', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <FaCheckCircle /> Verified
+                        </span>
+                      ) : (
+                        <span style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <FaExclamationTriangle /> Tampered
+                        </span>
+                      )}
                       {typeof selectedPrescription.onChainVerified === 'boolean' && (
                         <> — Blockchain: {selectedPrescription.onChainVerified ? 'present' : 'not found'}</>
                       )}

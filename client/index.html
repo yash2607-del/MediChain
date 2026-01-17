@@ -16,40 +16,171 @@
       z-index: 9999;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       background: transparent;
       padding: 0;
     }
 
-    /* Styled select that replaces the default Google UI */
-    #custom-translate-select {
-      -webkit-appearance: none;
-      appearance: none;
-      padding: 8px 36px 8px 12px;
+    /* Auth buttons next to language switcher */
+    .top-auth-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .top-auth-btn {
+      padding: 10px 20px;
       border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.08);
       font-size: 14px;
       font-weight: 600;
-      color: #6b6868;
-      background: linear-gradient(135deg, rgba(66,133,244,0.96) 0%, rgba(52,168,83,0.96) 100%);
-      box-shadow: 0 6px 18px rgba(66,133,244,0.24);
       cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      border: none;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .top-auth-btn.login {
+      background: white;
+      color: #00A9FF;
+      border: 2px solid #00A9FF;
+    }
+
+    .top-auth-btn.login:hover {
+      background: #00A9FF;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 169, 255, 0.3);
+    }
+
+    .top-auth-btn.signup {
+      background: linear-gradient(135deg, #00A9FF 0%, #89CFF3 100%);
+      color: white;
+      border: none;
+    }
+
+    .top-auth-btn.signup:hover {
+      background: linear-gradient(135deg, #0098e6 0%, #78bce0 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 169, 255, 0.4);
+    }
+
+    /* Language icon button */
+    #language-icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #00A9FF 0%, #89CFF3 100%);
+      box-shadow: 0 4px 12px rgba(0, 169, 255, 0.24);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
+      position: relative;
+    }
+
+    #language-icon-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 169, 255, 0.32);
+      background: linear-gradient(135deg, #0098e6 0%, #78bce0 100%);
+    }
+
+    #language-icon-btn svg {
+      width: 24px;
+      height: 24px;
+      color: white;
+    }
+
+    /* Styled select that replaces the default Google UI */
+    #custom-translate-select {
+      position: absolute;
+      top: 52px;
+      right: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      padding: 8px;
+      border-radius: 12px;
+      border: 1px solid #DDE4EA;
+      font-size: 14px;
+      font-weight: 500;
+      color: #0F172A;
+      background: white;
+      box-shadow: 0 8px 24px rgba(0, 169, 255, 0.15);
+      cursor: pointer;
+      min-width: 200px;
+      max-height: 400px;
+      overflow-y: auto;
+      display: none;
+      z-index: 10000;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      scrollbar-width: thin;
+      scrollbar-color: #00A9FF #f0f0f0;
+    }
+
+    #custom-translate-select::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #custom-translate-select::-webkit-scrollbar-track {
+      background: #f0f0f0;
+      border-radius: 10px;
+    }
+
+    #custom-translate-select::-webkit-scrollbar-thumb {
+      background: #00A9FF;
+      border-radius: 10px;
+    }
+
+    #custom-translate-select::-webkit-scrollbar-thumb:hover {
+      background: #0098e6;
+    }
+
+    #custom-translate-select.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
     }
 
     #custom-translate-select:focus {
-      outline: none;
-      box-shadow: 0 6px 20px rgba(66,133,244,0.32);
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #custom-translate-select:hover {
+      border-color: #00A9FF;
+      box-shadow: 0 10px 30px rgba(0, 169, 255, 0.25);
     }
 
     #custom-translate-select option {
-      color: #333;
-      background: #fff;
+      color: #0F172A;
+      background: white;
       font-weight: 500;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 4px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      line-height: 1.5;
+    }
+
+    #custom-translate-select option:hover {
+      background: linear-gradient(135deg, #CDF5FD 0%, #E8F8FF 100%);
+      color: #00A9FF;
+      transform: translateX(4px);
+    }
+
+    #custom-translate-select option:checked,
+    #custom-translate-select option:focus {
+      background: linear-gradient(135deg, #00A9FF 0%, #89CFF3 100%);
+      color: white;
+      font-weight: 600;
     }
 
     /* Hide Google Translate branding but keep dropdown visible */
@@ -135,25 +266,63 @@
   </head>
   <body>
     <div id="google_translate_element">
-      <select id="custom-translate-select" class="notranslate" translate="no" aria-label="Select language" onchange="setGTranslate(this.value)">
+      <div class="top-auth-buttons">
+        <a href="#/auth/patient" class="top-auth-btn login">Login</a>
+        <a href="#/auth/patient" class="top-auth-btn signup">Sign Up</a>
+      </div>
+      <button id="language-icon-btn" aria-label="Select language" onclick="toggleLanguageDropdown()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+        </svg>
+      </button>
+      <select id="custom-translate-select" class="notranslate" translate="no" aria-label="Select language" onchange="setGTranslate(this.value)" onblur="hideLanguageDropdown()">
         <option value="en" translate="no">English</option>
-        <option value="hi" translate="no">Hindi</option>
-        <option value="mr" translate="no">Marathi</option>
-        <option value="es" translate="no">Spanish</option>
-        <option value="fr" translate="no">French</option>
-        <option value="de" translate="no">German</option>
-        <option value="ja" translate="no">Japanese</option>
-        <option value="zh-CN" translate="no">Chinese (Simplified)</option>
-        <option value="ar" translate="no">Arabic</option>
-        <option value="pt" translate="no">Portuguese (Brazil)</option>
-        <option value="ru" translate="no">Russian</option>
-        <option value="it" translate="no">Italian</option>
-        <option value="" translate="no">Original</option>
+        <option value="hi" translate="no">हिन्दी (Hindi)</option>
+        <option value="bn" translate="no">বাংলা (Bengali)</option>
+        <option value="te" translate="no">తెలుగు (Telugu)</option>
+        <option value="mr" translate="no">मराठी (Marathi)</option>
+        <option value="ta" translate="no">தமிழ் (Tamil)</option>
+        <option value="gu" translate="no">ગુજરાતી (Gujarati)</option>
+        <option value="kn" translate="no">ಕನ್ನಡ (Kannada)</option>
+        <option value="ml" translate="no">മലയാളം (Malayalam)</option>
+        <option value="pa" translate="no">ਪੰਜਾਬੀ (Punjabi)</option>
+        <option value="bho" translate="no">भोजपुरी (Bhojpuri)</option>
+        <option value="as" translate="no">অসমীয়া (Assamese)</option>
+        <option value="mni-Mtei" translate="no">মৈতৈলোন্ (Manipuri)</option>
+        <option value="lus" translate="no">Mizo (Mizo)</option>
+        <option value="grt" translate="no">Garo (Garo)</option>
       </select>
     </div>
     <div id="root"></div>
 
     <script>
+      // Toggle language dropdown
+      function toggleLanguageDropdown() {
+        var sel = document.getElementById('custom-translate-select');
+        if (sel) {
+          var isShowing = sel.classList.contains('show');
+          if (isShowing) {
+            sel.classList.remove('show');
+            sel.size = 1;
+          } else {
+            sel.classList.add('show');
+            sel.focus();
+            // Expand the select to show all options (limit to 8 for better UX)
+            sel.size = Math.min(sel.options.length, 8);
+          }
+        }
+      }
+
+      function hideLanguageDropdown() {
+        setTimeout(function() {
+          var sel = document.getElementById('custom-translate-select');
+          if (sel && document.activeElement !== sel) {
+            sel.classList.remove('show');
+            sel.size = 1;
+          }
+        }, 200);
+      }
+
       // Helper to read cookies
       function _readCookie(name) {
         var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -192,7 +361,7 @@
         new window.google.translate.TranslateElement(
           {
             pageLanguage: 'en',
-            includedLanguages: 'en,hi,mr,es,fr,de,ja,zh-CN,ar,pt,ru,it',
+            includedLanguages: 'en,hi,bn,te,mr,ta,gu,kn,ml,pa,bho,as,mni-Mtei,lus,grt',
             layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
             autoDisplay: false,
             multilanguagePage: true

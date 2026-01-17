@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 
 export default function PatientHistory() {
   const [email, setEmail] = useState('');
@@ -293,9 +294,12 @@ export default function PatientHistory() {
                       padding: '0.25rem 0.75rem', 
                       borderRadius: '999px', 
                       fontSize: '0.875rem',
-                      fontWeight: '600'
+                      fontWeight: '600',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
                     }}>
-                      ✓ Verified
+                      <FaCheckCircle /> Verified
                     </span>
                   ) : (
                     <span style={{ 
@@ -304,9 +308,12 @@ export default function PatientHistory() {
                       padding: '0.25rem 0.75rem', 
                       borderRadius: '999px', 
                       fontSize: '0.875rem',
-                      fontWeight: '600'
+                      fontWeight: '600',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
                     }}>
-                      ⚠ Tampered
+                      <FaExclamationTriangle /> Tampered
                     </span>
                   )}
                   {typeof selected.onChainVerified === 'boolean' && (

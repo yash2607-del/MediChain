@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaCheckCircle } from 'react-icons/fa';
 
 export default function PharmacyVerificationForm() {
   const [formData, setFormData] = useState({
@@ -125,7 +126,9 @@ export default function PharmacyVerificationForm() {
     return (
       <div className="verification-success">
         <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>✓</div>
+          <div style={{ fontSize: 48, marginBottom: 16, color: '#10b981' }}>
+            <FaCheckCircle />
+          </div>
           <h2>Verification Submitted</h2>
           <p>Your pharmacy documents have been submitted for review. You will be notified once verified.</p>
           <button className="btn primary" onClick={() => setSubmitted(false)} style={{ marginTop: 16 }}>

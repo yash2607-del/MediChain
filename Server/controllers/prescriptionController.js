@@ -134,7 +134,7 @@ export async function getPrescriptionByIdWithVerify(req, res) {
 
     if (!verified) {
       const reason = !hashMatches ? 'hash-mismatch' : 'onchain-mismatch';
-      return res.status(409).json({ ok: false, verified: false, reason, id: doc._id, storedHash, computedHash, onChainVerified, canonical, doc });
+      return res.json({ ok: false, verified: false, reason, id: doc._id, storedHash, computedHash, onChainVerified, canonical, doc });
     }
 
     return res.json({ ok: true, verified: true, id: doc._id, storedHash, computedHash, onChainVerified, canonical, doc });

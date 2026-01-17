@@ -62,8 +62,18 @@
 }
 
 .section-title::before {
-  content: '📋';
-  font-size: 1.5rem;
+  content: '';
+  display: inline-block;
+  width: 1.2em;
+  height: 1.5em;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  position: relative;
+  background: linear-gradient(currentColor 0 0) 50% 30%/60% 2px no-repeat,
+              linear-gradient(currentColor 0 0) 50% 50%/60% 2px no-repeat,
+              linear-gradient(currentColor 0 0) 50% 70%/60% 2px no-repeat;
 }
 
 /* Appointment Details Section */
@@ -75,7 +85,18 @@
 }
 
 .appointment-details-section .section-title::before {
-  content: '📝';
+  content: '';
+  display: inline-block;
+  width: 1.2em;
+  height: 1.5em;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  position: relative;
+  background: linear-gradient(currentColor 0 0) 50% 35%/50% 2px no-repeat,
+              linear-gradient(currentColor 0 0) 50% 55%/50% 2px no-repeat,
+              linear-gradient(currentColor 0 0) 50% 75%/50% 2px no-repeat;
 }
 
 .section-header {

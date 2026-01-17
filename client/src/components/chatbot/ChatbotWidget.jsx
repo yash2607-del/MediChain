@@ -7,7 +7,7 @@ const ChatbotWidget = () => {
     window.__chatbaseLoaded = true;
 
     window.chatbaseConfig = {
-      chatbotId: "2Knv76bKNafw3mdRT4iWt", // ✅ THIS VALUE
+      chatbotId: "2Knv76bKNafw3mdRT4iWt", // Chatbot ID
     };
 
     const script = document.createElement("script");

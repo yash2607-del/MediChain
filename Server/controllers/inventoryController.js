@@ -109,8 +109,29 @@ export const searchInventory = async (req, res) => {
       const pharmacyIds = [...new Set(items.map(i => i.pharmacyId).filter(Boolean))];
       let pharmacyMap = new Map();
       if (pharmacyIds.length) {
-        const pharmacies = await User.find({ _id: { $in: pharmacyIds } }, { profile: 1, role: 1 });
-        pharmacyMap = new Map(pharmacies.map(p => [String(p._id), p]));
+        const validObjectIds = pharmacyIds.filter(id => mongoose.Types.ObjectId.isValid(id));
+        const nonObjectIds = pharmacyIds.filter(id => !mongoose.Types.ObjectId.isValid(id));
+
+        if (validObjectIds.length) {
+          const pharmacies = await User.find({ _id: { $in: validObjectIds } }, { profile: 1, role: 1 });
+          pharmacies.forEach(p => {
+            pharmacyMap.set(String(p._id), p);
+            const profilePharmacyId = p?.profile?.pharmacyId;
+            if (profilePharmacyId) pharmacyMap.set(String(profilePharmacyId), p);
+          });
+        }
+
+        if (nonObjectIds.length) {
+          const pharmaciesByProfileId = await User.find(
+            { 'profile.pharmacyId': { $in: nonObjectIds } },
+            { profile: 1, role: 1 }
+          );
+          pharmaciesByProfileId.forEach(p => {
+            pharmacyMap.set(String(p._id), p);
+            const profilePharmacyId = p?.profile?.pharmacyId;
+            if (profilePharmacyId) pharmacyMap.set(String(profilePharmacyId), p);
+          });
+        }
       }
       const results = items.map(i => {
         const ph = pharmacyMap.get(String(i.pharmacyId));
