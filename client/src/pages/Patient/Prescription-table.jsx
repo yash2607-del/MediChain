@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FaDownload, FaEye, FaTimes, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { FaDownload, FaEye, FaTimes, FaCheckCircle, FaExclamationTriangle, FaShareAlt, FaLock, FaStore, FaCheck, FaCopy } from 'react-icons/fa';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import './Prescription-table.css';
