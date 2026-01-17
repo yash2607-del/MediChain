@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 /**
  * Generate a professional pharmacy bill PDF
@@ -16,7 +16,7 @@ export const generateBillPDF = (billData, pharmacyInfo = {}) => {
   const margin = 20;
   
   // Colors
-  const primaryColor = [102, 126, 234]; // #667eea
+  const primaryColor = [0, 169, 255]; // #00A9FF
   const textColor = [15, 23, 42]; // #0f172a
   const lightGray = [241, 245, 249]; // #f1f5f9
   
@@ -89,7 +89,7 @@ export const generateBillPDF = (billData, pharmacyInfo = {}) => {
     `₹${(item.price * item.qty).toFixed(2)}`
   ]);
   
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPosition,
     head: [['Medicine Name', 'Code', 'Price', 'Qty', 'Subtotal']],
     body: tableData,
@@ -117,7 +117,8 @@ export const generateBillPDF = (billData, pharmacyInfo = {}) => {
   });
   
   // Totals section
-  yPosition = doc.lastAutoTable.finalY + 15;
+  const lastY = doc?.lastAutoTable?.finalY;
+  yPosition = (typeof lastY === 'number' ? lastY : yPosition + 35) + 15;
   
   const totalsX = pageWidth - margin - 60;
   const labelX = totalsX - 50;

@@ -14,6 +14,7 @@ export default function PharmacyDashboard() {
   const [bills, setBills] = useState([]);
   const [stats, setStats] = useState({ revenue: 0, orders: 0, products: 0, customers: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const session = (() => {
     try {
@@ -23,7 +24,7 @@ export default function PharmacyDashboard() {
     }
   })();
 
-  const pharmacyId = session?.user?.id || session?.user?._id;
+  const pharmacyId = session?.user?.id || session?.user?._id || session?.pharmacyId || session?.pharmacyID || session?.pharmacy_id;
   const pharmacyInfo = {
     name: session?.user?.profile?.shopName || session?.user?.profile?.name || 'MediChain Pharmacy',
     address: session?.user?.profile?.address || '',
@@ -31,21 +32,31 @@ export default function PharmacyDashboard() {
     email: session?.user?.email || '',
   };
 
+  const apiUrl = useCallback((path) => {
+    const base = import.meta.env?.VITE_API_BASE_URL;
+    if (base) return new URL(path.replace(/^\//, ''), base.endsWith('/') ? base : `${base}/`).toString();
+    return `/${path.replace(/^\//, '')}`;
+  }, []);
+
   useEffect(() => {
     if (!pharmacyId) return;
     setLoading(true);
-    fetch(`/api/inventory?pharmacyId=${encodeURIComponent(pharmacyId)}`)
+    setError('');
+    fetch(apiUrl(`api/inventory?pharmacyId=${encodeURIComponent(pharmacyId)}`))
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setInventory(data);
       })
-      .catch((err) => console.error('Failed to load inventory:', err))
+      .catch((err) => {
+        console.error('Failed to load inventory:', err);
+        setError(err?.message || 'Failed to load inventory');
+      })
       .finally(() => setLoading(false));
-  }, [pharmacyId]);
+  }, [pharmacyId, apiUrl]);
 
   useEffect(() => {
     if (!pharmacyId) return;
-    fetch(`/api/billing?pharmacyId=${encodeURIComponent(pharmacyId)}`)
+    fetch(apiUrl(`api/billing?pharmacyId=${encodeURIComponent(pharmacyId)}`))
       .then((r) => r.json())
       .then((data) => {
         if (!Array.isArray(data)) return;
@@ -60,7 +71,7 @@ export default function PharmacyDashboard() {
         });
       })
       .catch((err) => console.error('Failed to load bills:', err));
-  }, [pharmacyId, inventory.length]);
+  }, [pharmacyId, inventory.length, apiUrl]);
 
   const addMedicine = useCallback((med) => {
     setInventory((prev) => {
@@ -102,6 +113,12 @@ export default function PharmacyDashboard() {
         {loading && (
           <div className="pharmacy-section">
             <div style={{ padding: '1rem', color: '#64748b' }}>Loading…</div>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="pharmacy-section">
+            <div style={{ padding: '1rem', color: '#dc2626', fontWeight: 700 }}>{error}</div>
           </div>
         )}
 
