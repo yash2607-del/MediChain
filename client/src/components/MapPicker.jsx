@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 
 export default function MapPicker({ label = "Location", value, onChange, height = 260, showDetect = true }) {
@@ -43,6 +43,16 @@ export default function MapPicker({ label = "Location", value, onChange, height 
     return null;
   }
 
+  function RecenterOnChange({ lat, lng }) {
+    const map = useMap();
+    useEffect(() => {
+      if (typeof lat === "number" && typeof lng === "number") {
+        map.setView([lat, lng], map.getZoom(), { animate: true });
+      }
+    }, [lat, lng, map]);
+    return null;
+  }
+
   const detectLocation = () => {
     setLoading(true);
     if (!navigator.geolocation) {
@@ -71,7 +81,7 @@ export default function MapPicker({ label = "Location", value, onChange, height 
           setLoading(false);
         }
       },
-      { timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -96,6 +106,7 @@ export default function MapPicker({ label = "Location", value, onChange, height 
       <div style={{ height: height, borderRadius: 8, overflow: "hidden" }}>
         <MapContainer center={[internal.lat, internal.lng]} zoom={14} style={{ height: "100%", width: "100%" }}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <RecenterOnChange lat={internal.lat} lng={internal.lng} />
           <Marker position={[internal.lat, internal.lng]} draggable={true} eventHandlers={{ dragend: (e) => {
             const ll = e.target.getLatLng();
             setPos({ lat: ll.lat, lng: ll.lng });

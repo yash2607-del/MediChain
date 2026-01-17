@@ -1,5 +1,6 @@
 import Billing from '../models/Billing.js';
 import Inventory from '../models/Inventory.js';
+import Prescription from '../models/Prescription.js';
 
 const toPositiveInt = (value) => {
   const n = Math.floor(Number(value));
@@ -107,7 +108,7 @@ export const getBills = async (req, res) => {
     return res.status(500).json({ error: 'Server error' });
   }
 };
-
+  
 export const getBillById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -118,4 +119,5 @@ export const getBillById = async (req, res) => {
     console.error('getBillById err', err);
     return res.status(500).json({ error: 'Server error' });
   }
-};
+} ;
+  

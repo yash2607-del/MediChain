@@ -97,9 +97,8 @@ export default function FindADoctor() {
       },
       (err) => {
         setLocError('Unable to get location. Please allow location access.');
-        console.error(err);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   }
 

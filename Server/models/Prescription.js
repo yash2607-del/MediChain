@@ -28,6 +28,11 @@ const PrescriptionSchema = new Schema({
   chainTxHash: { type: String },
   chainNetwork: { type: String },
   chainConfirmed: { type: Boolean },
+  // Privacy/Lock fields
+  isLocked: { type: Boolean, default: true }, // Locked by default - only patient can see
+  shareOtp: { type: String, default: null }, // 4-digit OTP for sharing with pharmacy (unique per user)
+  otpExpiresAt: { type: Date, default: null }, // OTP expiration time
+  otpVerifiedBy: { type: String, default: null }, // Pharmacy ID that verified OTP
   // meta
   createdAt: { type: Date, default: () => new Date() }
 })

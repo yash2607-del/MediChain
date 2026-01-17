@@ -128,14 +128,16 @@
   gap: 0.5rem;
 }
 
-.pending-section h2::before {
-  content: '⏳';
-  font-size: 1.5rem;
+.pending-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.confirmed-section h2::before {
-  content: '✅';
-  font-size: 1.5rem;
+.confirmed-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .empty-message {

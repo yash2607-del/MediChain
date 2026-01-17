@@ -19,10 +19,12 @@ import AppointmentForm from './pages/Patient/Appointment-form.jsx'
 import PrescriptionTable from './pages/Patient/Prescription-table.jsx'
 import PatientAppointments from './pages/Patient/PatientAppointments.jsx'
 import Logout from './components/Logout.jsx'
+import LanguageWidget from './components/LanguageWidget.jsx'
 export default function App() {
   return (
     <BrowserRouter>
       <div className="app">
+        <LanguageWidget />
         <main>
           <Routes>
             {/* Home and public pages */}
@@ -70,7 +72,7 @@ export default function App() {
             <Route path="/appointment-form" element={<AppointmentForm />} />
             <Route path="/prescription-table" element={<PrescriptionTable />} />
             <Route path="/patient-appointments" element={<PatientAppointments />} />
-l            <Route path="/logout" element={<Logout />} />
+            <Route path="/logout" element={<Logout />} />
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>

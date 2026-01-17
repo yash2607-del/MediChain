@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FaCheckCircle, FaSpinner, FaTimesCircle } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaCheckCircle } from 'react-icons/fa';
 
 export default function VerificationForm() {
   const [formData, setFormData] = useState({
@@ -169,7 +169,9 @@ export default function VerificationForm() {
     return (
       <div className="verification-success">
         <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>✓</div>
+          <div style={{ fontSize: 48, marginBottom: 16, color: '#10b981' }}>
+            <FaCheckCircle />
+          </div>
           <h2>Verification Submitted</h2>
           <p>Your documents have been submitted for review. You will be notified once verified.</p>
           <button className="btn primary" onClick={() => setSubmitted(false)} style={{ marginTop: 16 }}>
