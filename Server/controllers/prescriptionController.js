@@ -138,6 +138,7 @@ export async function getPrescriptionByIdWithVerify(req, res) {
     const { hash: computedHash, canonical } = hashPrescription(core);
 
     const storedHash = doc.dataHash || null;
+    const chainTxHash = doc.chainTxHash || null;
     const hashMatches = !!storedHash && storedHash.toLowerCase() === computedHash.toLowerCase();
 
     // Verify on-chain best-effort; if chain env missing, don't hard-fail
@@ -157,10 +158,10 @@ export async function getPrescriptionByIdWithVerify(req, res) {
 
     if (!verified) {
       const reason = !hashMatches ? 'hash-mismatch' : 'onchain-mismatch';
-      return res.json({ ok: false, verified: false, reason, id: doc._id, storedHash, computedHash, onChainVerified, canonical, doc });
+      return res.json({ ok: false, verified: false, reason, id: doc._id, storedHash, computedHash, onChainVerified, canonical, chainTxHash, doc });
     }
 
-    return res.json({ ok: true, verified: true, id: doc._id, storedHash, computedHash, onChainVerified, canonical, doc });
+    return res.json({ ok: true, verified: true, id: doc._id, storedHash, computedHash, onChainVerified, canonical, chainTxHash, doc });
   } catch (err) {
     console.error('getPrescriptionByIdWithVerify error:', err);
     return res.status(500).json({ error: 'Failed to fetch prescription' });

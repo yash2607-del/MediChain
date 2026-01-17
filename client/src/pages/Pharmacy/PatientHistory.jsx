@@ -88,6 +88,7 @@ export default function PatientHistory() {
         storedHash: data.storedHash,
         computedHash: data.computedHash,
         onChainVerified: typeof data.onChainVerified === 'boolean' ? data.onChainVerified : null,
+        txHash: data.chainTxHash || null,
         canonical: data.canonical,
         doc: data.doc || null
       };
@@ -611,6 +612,10 @@ export default function PatientHistory() {
                       <div>
                         <strong>Computed Hash:</strong><br />
                         <span style={{ wordBreak: 'break-all' }}>{selected.computedHash || '—'}</span>
+                      </div>
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <strong>Blockchain Tx Hash:</strong><br />
+                        <span style={{ wordBreak: 'break-all' }}>{selected.txHash || '—'}</span>
                       </div>
                     </div>
                   </details>

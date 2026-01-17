@@ -78,6 +78,7 @@ export default function PrescriptionTable() {
         storedHash: data.storedHash,
         computedHash: data.computedHash,
         onChainVerified: typeof data.onChainVerified === 'boolean' ? data.onChainVerified : null,
+        txHash: data.chainTxHash || null,
         canonical: data.canonical,
         doc: data.doc || null
       };
@@ -751,6 +752,7 @@ export default function PrescriptionTable() {
                     <h3>Technical Details</h3>
                     <p><strong>Stored Hash:</strong> {selectedPrescription.storedHash || '—'}</p>
                     <p><strong>Computed Hash:</strong> {selectedPrescription.computedHash || '—'}</p>
+                    <p><strong>Blockchain Tx Hash:</strong> {selectedPrescription.txHash || '—'}</p>
                     {selectedPrescription.reason && (
                       <p><strong>Reason:</strong> {selectedPrescription.reason}</p>
                     )}
