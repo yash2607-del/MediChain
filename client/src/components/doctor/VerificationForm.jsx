@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaCheckCircle } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle, FaSpinner } from 'react-icons/fa';
 
 export default function VerificationForm() {
   const [formData, setFormData] = useState({
