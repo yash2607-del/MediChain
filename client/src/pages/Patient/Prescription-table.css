@@ -171,6 +171,69 @@
   transform: translateY(0);
 }
 
+/* Share Button */
+.btn-share {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.btn-share:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-share:active {
+  transform: translateY(0);
+}
+
+.btn-share:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Lock Button */
+.btn-lock {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.btn-lock:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-lock:active {
+  transform: translateY(0);
+}
+
+.btn-lock:disabled {
+  background: #fca5a5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Private Status Badge */
+.status-private {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.75rem;
+  background: #f3f4f6;
+  color: #6b7280;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+}
+
+/* OTP Modal Specific */
+.otp-modal {
+  max-width: 420px;
+}
+
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
@@ -482,4 +545,173 @@
 
 .empty-state p {
   font-size: 0.875rem;
+}
+
+/* Pharmacy Selector Modal */
+.pharmacy-modal .modal-content {
+  max-width: 500px;
+}
+
+.pharmacy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.pharmacy-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.pharmacy-item:hover {
+  border-color: #00A9FF;
+  background: #f0faff;
+}
+
+.pharmacy-item.selected {
+  border-color: #00A9FF;
+  background: linear-gradient(135deg, #e0f4ff 0%, #f0faff 100%);
+}
+
+.pharmacy-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.pharmacy-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pharmacy-address {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.availability-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.availability-badge.full {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.availability-badge.partial {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.selected-indicator {
+  color: #00A9FF;
+  font-size: 1.25rem;
+  margin-left: 0.5rem;
+}
+
+.no-pharmacies {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.no-pharmacies p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.pharmacy-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-cancel {
+  padding: 0.6rem 1.25rem;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+  background: #e5e7eb;
+}
+
+.btn-generate-otp {
+  padding: 0.6rem 1.25rem;
+  background: linear-gradient(135deg, #00A9FF 0%, #0088cc 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-generate-otp:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+  transform: translateY(-1px);
+}
+
+.btn-generate-otp:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading State in Pharmacy Modal */
+.pharmacy-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.pharmacy-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #00A9FF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
