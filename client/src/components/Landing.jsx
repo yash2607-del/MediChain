@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import '../styles/landing.scss'
 
 // React Icons imports
@@ -34,31 +35,110 @@ export default function Landing() {
     setShowModal(false)
   }
 
+  // Animation variants
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 60 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.8, ease: [0.42, 0, 0.58, 1] } // easeInOut
+    }
+  }
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1
+      }
+    }
+  }
+
+  const cardVariant = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.6, ease: [0.42, 0, 0.58, 1] } // easeInOut
+    }
+  }
+
+  const badgeVariant = {
+    hidden: { opacity: 0, scale: 0.8, y: -20 },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: [0.42, 0, 0.58, 1] }
+    }
+  }
+
+  const heroTextVariant = {
+    hidden: { opacity: 0, y: 30 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.15,
+        duration: 0.7,
+        ease: [0.42, 0, 0.58, 1]
+      }
+    })
+  }
+
   return (
     <div className="landing">
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-content">
-          <div className="hero-badge">
-            <span className="badge">Blockchain-Enabled</span>
-            <span className="badge">AI-Powered</span>
-            <span className="badge">Secure</span>
-          </div>
-          <h1 className="hero-title">
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+            className="hero-badge"
+          >
+            <motion.span variants={badgeVariant} className="badge">Blockchain-Enabled</motion.span>
+            <motion.span variants={badgeVariant} className="badge">AI-Powered</motion.span>
+            <motion.span variants={badgeVariant} className="badge">Secure</motion.span>
+          </motion.div>
+          
+          <motion.h1 
+            custom={0}
+            initial="hidden"
+            animate="visible"
+            variants={heroTextVariant}
+            className="hero-title"
+          >
             MediChain
             <span className="subtitle">Blockchain-Enabled Healthcare Ecosystem</span>
-          </h1>
-          <p className="hero-description">
+          </motion.h1>
+          
+          <motion.p 
+            custom={1}
+            initial="hidden"
+            animate="visible"
+            variants={heroTextVariant}
+            className="hero-description"
+          >
             A secure, AI-powered, and blockchain-backed web application connecting 
             <strong> patients</strong>, <strong>doctors</strong>, and <strong>pharmacies</strong> through 
             verified prescriptions, real-time inventory, and intelligent health guidance.
-          </p>
-          <div className="hero-cta">
-            <button className="btn primary" onClick={handleGetStarted}>Get Started</button>
+          </motion.p>
+          
+          <motion.div 
+            custom={2}
+            initial="hidden"
+            animate="visible"
+            variants={heroTextVariant}
+            className="hero-cta"
+          >
+           <button className="btn primary" onClick={handleGetStarted}>Get Started</button>
             <button className="btn secondary" onClick={() => document.getElementById('overview').scrollIntoView({ behavior: 'smooth' })}>
               Learn More
             </button>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -70,8 +150,14 @@ export default function Landing() {
             MediChain revolutionizes healthcare management by connecting patients, doctors, and pharmacies 
             through cutting-edge blockchain and AI technology.
           </p>
-          <div className="overview-grid">
-            <div className="overview-flow-card">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+            className="overview-grid"
+          >
+            <motion.div variants={cardVariant} className="overview-flow-card">
               <div className="flow-header">
                 <FaLink size={28} color="#00A9FF" />
                 <h3>Blockchain Prescription Flow</h3>
@@ -98,9 +184,9 @@ export default function Landing() {
                   <p>Patient dashboard fetches verified prescriptions from blockchain</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="overview-flow-card">
+            <motion.div variants={cardVariant} className="overview-flow-card">
               <div className="flow-header">
                 <FaRobot size={28} color="#00A9FF" />
                 <h3>AI Chatbot Flow</h3>
@@ -119,9 +205,9 @@ export default function Landing() {
                   <p>Returns a list of relevant doctors nearby, fetched from the database</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="overview-flow-card">
+            <motion.div variants={cardVariant} className="overview-flow-card">
               <div className="flow-header">
                 <FaMapMarkerAlt size={28} color="#00A9FF" />
                 <h3>Medicine Search & Map Integration</h3>
@@ -144,9 +230,9 @@ export default function Landing() {
                   <p>Nearby pharmacies are displayed as map markers with directions</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="overview-flow-card">
+            <motion.div variants={cardVariant} className="overview-flow-card">
               <div className="flow-header">
                 <FaCheckCircle size={28} color="#00A9FF" />
                 <h3>Prescription Verification Flow</h3>
@@ -173,9 +259,9 @@ export default function Landing() {
                   <p>Verified prescription allows medicine dispensing</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="overview-flow-card">
+            <motion.div variants={cardVariant} className="overview-flow-card">
               <div className="flow-header">
                 <FaBoxes size={28} color="#00A9FF" />
                 <h3>Inventory Management Flow</h3>
@@ -202,9 +288,9 @@ export default function Landing() {
                   <p>Inventory automatically updates after each transaction</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="overview-flow-card">
+            <motion.div variants={cardVariant} className="overview-flow-card">
               <div className="flow-header">
                 <FaShieldAlt size={28} color="#00A9FF" />
                 <h3>Data Security & Privacy Flow</h3>
@@ -227,17 +313,30 @@ export default function Landing() {
                   <p>Audit trail maintained for all data access</p>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Roles Section */}
       <section className="section roles">
         <div className="container">
-          <h2>Built for Every Healthcare Stakeholder</h2>
-          <div className="roles-grid">
-            <div className="role-card" onClick={() => navigate('/auth/doctor')}>
+          <motion.h2
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            Built for Every Healthcare Stakeholder
+          </motion.h2>
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="roles-grid"
+          >
+            <motion.div variants={cardVariant} className="role-card" onClick={() => navigate('/auth/doctor')}>
               <div className="role-icon">
                 <FaUserMd size={48} color="#00A9FF" />
               </div>
@@ -248,9 +347,9 @@ export default function Landing() {
                 <li>Ensure all prescriptions are verifiable and tamper-proof</li>
               </ul>
               <button className="btn outline">For Doctors →</button>
-            </div>
+            </motion.div>
 
-            <div className="role-card" onClick={() => navigate('/auth/patient')}>
+            <motion.div variants={cardVariant} className="role-card" onClick={() => navigate('/auth/patient')}>
               <div className="role-icon">
                 <FaUser size={48} color="#00A9FF" />
               </div>
@@ -261,9 +360,9 @@ export default function Landing() {
                 <li>Interact with a GenAI chatbot to describe symptoms and receive doctor recommendations</li>
               </ul>
               <button className="btn outline">For Patients →</button>
-            </div>
+            </motion.div>
 
-            <div className="role-card" onClick={() => navigate('/auth/pharmacy')}>
+            <motion.div variants={cardVariant} className="role-card" onClick={() => navigate('/auth/pharmacy')}>
               <div className="role-icon">
                 <FaClinicMedical size={48} color="#00A9FF" />
               </div>
@@ -274,202 +373,109 @@ export default function Landing() {
                 <li>Generate bills from inventory and sync with the shared pharmacy database</li>
               </ul>
               <button className="btn outline">For Pharmacies →</button>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Core Features */}
       <section className="section features">
         <div className="container">
-          <h2>Core Features</h2>
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon">
-                <FaLink size={48} color="#00A9FF" />
+          <motion.h2 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+            className="features-title"
+          >
+            Core Features
+          </motion.h2>
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="features-grid-modern"
+          >
+            <motion.div variants={cardVariant} className="feature-card-modern">
+              <div className="feature-icon-wrapper">
+                <FaLink size={40} color="#00A9FF" />
               </div>
               <h3>Blockchain-Powered Prescriptions</h3>
               <p>Every prescription is hashed and stored on-chain for authenticity verification.</p>
-            </div>
+            </motion.div>
             
-            <div className="feature-card">
-              <div className="feature-icon">
-                <FaBoxes size={48} color="#00A9FF" />
+            <motion.div variants={cardVariant} className="feature-card-modern">
+              <div className="feature-icon-wrapper">
+                <FaBoxes size={40} color="#00A9FF" />
               </div>
               <h3>Pharmacy Inventory Management</h3>
               <p>Add, track, and scan medicine stock using QR codes.</p>
-            </div>
+            </motion.div>
             
-            <div className="feature-card">
-              <div className="feature-icon">
-                <FaMapMarkerAlt size={48} color="#00A9FF" />
+            <motion.div variants={cardVariant} className="feature-card-modern">
+              <div className="feature-icon-wrapper">
+                <FaMapMarkerAlt size={40} color="#00A9FF" />
               </div>
               <h3>Medicine Locator Map</h3>
               <p>Patients can search for medicines nearby via geolocation-enabled maps.</p>
-            </div>
+            </motion.div>
             
-            <div className="feature-card">
-              <div className="feature-icon">
-                <FaRobot size={48} color="#00A9FF" />
+            <motion.div variants={cardVariant} className="feature-card-modern">
+              <div className="feature-icon-wrapper">
+                <FaRobot size={40} color="#00A9FF" />
               </div>
               <h3>AI Chatbot</h3>
               <p>A generative AI chatbot helps patients classify symptoms and suggests the right doctor specialization.</p>
-            </div>
+            </motion.div>
             
-            <div className="feature-card">
-              <div className="feature-icon">
-                <FaTh size={48} color="#00A9FF" />
+            <motion.div variants={cardVariant} className="feature-card-modern">
+              <div className="feature-icon-wrapper">
+                <FaTh size={40} color="#00A9FF" />
               </div>
               <h3>Role-Based Dashboards</h3>
               <p>Secure authentication and different dashboards for each user type.</p>
-            </div>
+            </motion.div>
             
-            <div className="feature-card">
-              <div className="feature-icon">
-                <FaCheckCircle size={48} color="#00A9FF" />
+            <motion.div variants={cardVariant} className="feature-card-modern">
+              <div className="feature-icon-wrapper">
+                <FaCheckCircle size={40} color="#00A9FF" />
               </div>
               <h3>Verified Transactions</h3>
               <p>Pharmacies verify prescriptions through blockchain before dispensing.</p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="section how-it-works">
-        <div className="container">
-          <h2>How It Works</h2>
-          <div className="flows-container">
-            <div className="flow-card">
-              <h3><FaLink size={24} color="#00A9FF" /> Blockchain Prescription Flow</h3>
-              <div className="flow-steps">
-                <div className="step">
-                  <span className="step-number">1</span>
-                  <p>Doctor creates a prescription → JSON object generated</p>
-                </div>
-                <div className="step">
-                  <span className="step-number">2</span>
-                  <p>Prescription is hashed and uploaded to blockchain → transaction hash returned</p>
-                </div>
-                <div className="step">
-                  <span className="step-number">3</span>
-                  <p>Hash stored in backend DB linked to doctor, patient, and pharmacy IDs</p>
-                </div>
-                <div className="step">
-                  <span className="step-number">4</span>
-                  <p>Pharmacy scans prescription QR → hash verified on blockchain</p>
-                </div>
-                <div className="step">
-                  <span className="step-number">5</span>
-                  <p>Patient dashboard fetches verified prescriptions from blockchain</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flow-card">
-              <h3><FaRobot size={24} color="#00A9FF" /> AI Chatbot Flow</h3>
-              <div className="flow-steps">
-                <div className="step">
-                  <span className="step-number">1</span>
-                  <p>Patient interacts with chatbot and describes symptoms</p>
-                </div>
-                <div className="step">
-                  <span className="step-number">2</span>
-                  <p>Generative AI model categorizes symptoms into medical specializations</p>
-                </div>
-                <div className="step">
-                  <span className="step-number">3</span>
-                  <p>Returns a list of relevant doctors nearby, fetched from the database</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flow-card">
-              <h3><FaMapMarkerAlt size={24} color="#00A9FF" /> Medicine Search & Map Integration</h3>
-              <div className="flow-steps">
-                <div className="step">
-                  <span className="step-bullet">•</span>
-                  <p>Each pharmacy updates inventory with available medicines</p>
-                </div>
-                <div className="step">
-                  <span className="step-bullet">•</span>
-                  <p>Patients search for a medicine name</p>
-                </div>
-                <div className="step">
-                  <span className="step-bullet">•</span>
-                  <p>The app queries all pharmacy databases and filters by geolocation</p>
-                </div>
-                <div className="step">
-                  <span className="step-bullet">•</span>
-                  <p>Nearby pharmacies are displayed as map markers with directions</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Future Enhancements */}
-      <section className="section future">
-        <div className="container">
-          <h2>Future Enhancements</h2>
-          <div className="future-grid">
-            <div className="future-item">
-              <span className="future-icon">
-                <FaMobileAlt size={32} color="#00A9FF" />
-              </span>
-              <p>Mobile app (React Native / Flutter)</p>
-            </div>
-            <div className="future-item">
-              <span className="future-icon">
-                <FaShieldAlt size={32} color="#00A9FF" />
-              </span>
-              <p>Integration with insurance providers for e-claim verification</p>
-            </div>
-            <div className="future-item">
-              <span className="future-icon">
-                <FaExclamationTriangle size={32} color="#00A9FF" />
-              </span>
-              <p>AI-based prescription conflict detection</p>
-            </div>
-            <div className="future-item">
-              <span className="future-icon">
-                <FaMicrophone size={32} color="#00A9FF" />
-              </span>
-              <p>Voice-based chatbot for accessibility</p>
-            </div>
-            <div className="future-item">
-              <span className="future-icon">
-                <FaVideo size={32} color="#00A9FF" />
-              </span>
-              <p>Integration with telemedicine APIs for online consultations</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="section cta">
-        <div className="container">
-          <div className="cta-content">
-            <h2>Ready to Transform Healthcare?</h2>
-            <p>Join the blockchain revolution in healthcare. Secure, transparent, and intelligent.</p>
-            <button className="btn primary large" onClick={handleGetStarted}>Get Started Today</button>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
+      {/* Footer with CTA */}
       <footer className="footer">
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-left">
-              <h3>MediChain</h3>
-              <p>Blockchain-Enabled Healthcare Ecosystem</p>
-            </div>
-            <div className="footer-right">
-              <p>© {new Date().getFullYear()} MediChain — Your prescription, your data, your control.</p>
-              <p>Licensed under the MIT License</p>
+        <div className="footer-cta-section">
+          <div className="container">
+            <h2>Discover how MediChain transforms healthcare management</h2>
+            <p>See how MediChain helps decision-makers work faster, stay organised, and deliver fair, informed outcomes — without changing your existing systems.</p>
+            <button className="btn cta-button" onClick={handleGetStarted}>Get Started</button>
+          </div>
+          <div className="footer-watermark">medichain</div>
+        </div>
+        
+        <div className="footer-bottom">
+          <div className="container">
+            <div className="footer-content">
+              <div className="footer-left">
+                <p> {new Date().getFullYear()} MediChain. All rights reserved.</p>
+              </div>
+              <nav className="footer-nav">
+                <a href="#overview">Features</a>
+                <a href="/patients">Patients</a>
+                <a href="/doctors">Doctors</a>
+                <a href="#overview">Security</a>
+                <a href="#overview">FAQ</a>
+                <a href="#overview">About</a>
+              </nav>
+              <div className="footer-right">
+                <a href="mailto:info@medichain.technology">info@medichain.technology</a>
+              </div>
             </div>
           </div>
         </div>
