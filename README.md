@@ -10,17 +10,17 @@ The system aims to eliminate prescription fraud, simplify medicine discovery, an
 
 ## 👥 Roles & Dashboards
 
-### 🧑‍⚕️ Doctor
+###  Doctor
 - Create and issue digital prescriptions stored immutably on the blockchain
 - Access patient medical histories and past prescriptions
 - Ensure all prescriptions are verifiable and tamper-proof through blockchain validation
 
-### 💊 Pharmacy
+###  Pharmacy
 - Verify prescriptions via blockchain before dispensing medication
 - Manage and update real-time medicine inventory through a centralized system
 - Generate billing records directly linked to verified transactions
 
-### 🧍‍♂️ Patient
+###  Patient
 - Access and review all verified prescriptions securely through a personal dashboard
 - Search for medicines and locate pharmacies with real-time availability using an interactive map
 - Interact with an AI-powered chatbot to describe symptoms and receive doctor recommendations based on AI-classified specialization
@@ -44,10 +44,10 @@ The system aims to eliminate prescription fraud, simplify medicine discovery, an
 4. Pharmacy verifies the prescription hash on the blockchain before dispensing
 5. Patient views all verified prescriptions through their secure dashboard
 
-## 💬 AI Chatbot Workflow
+##  AI Chatbot Workflow
 
 1. Patient describes symptoms through the chatbot interface
-2. The AI model analyzes input and classifies symptoms into medical specializations
+2. The AI model analyzes input and classifies symptoms into medical specializations and give general recommendation 
 3. The system retrieves and displays a list of relevant doctors based on specialization and location
 
 ## 🗺️ Medicine Search & Map Integration
@@ -57,15 +57,13 @@ The system aims to eliminate prescription fraud, simplify medicine discovery, an
 3. The platform queries participating pharmacies, filtering results by geolocation
 4. Nearby pharmacies are displayed on an interactive map with directions and availability details
 
-## 🔮 Future Enhancements
+##  Future Enhancements
 
-- 📱 Mobile application (React Native / Flutter)
-- 🧾 Integration with insurance providers for automated e-claim verification
-- 🤖 AI-based prescription conflict detection
-- 🗣️ Voice-enabled chatbot for improved accessibility
-- 🏥 Integration with telemedicine APIs for online consultations
+-  Mobile application (React Native / Flutter)
+-  Integration with insurance providers for automated e-claim verification.
+-  AI-based prescription conflict detection
+-  Voice-enabled chatbot for improved accessibility
+-  Integration with telemedicine APIs for online consultations
+  
 
 
-## 📄 License
-
-This project is licensed under the MIT License.
